@@ -1,0 +1,108 @@
+<mat-toolbar color="primary" class="admin-header">
+  <mat-toolbar-row>
+    <button mat-icon-button (click)="toggleSidenav()" class="menu-button">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <span class="spacer"></span>
+    <span class="header-title">Panneau d'Administration</span>
+    <span class="spacer"></span>
+    <span class="user-info">{{ currentUser.name }}</span>
+    <button mat-icon-button (click)="logout()" class="logout-button">
+      <mat-icon>logout</mat-icon>
+    </button>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<mat-sidenav-container class="admin-container">
+  <mat-sidenav 
+    [opened]="isSidenavOpen" 
+    mode="side" 
+    class="admin-sidenav">
+    <mat-nav-list>
+      <mat-list-item (click)="navigateTo('dashboard')" class="nav-item">
+        <mat-icon mat-list-icon>dashboard</mat-icon>
+        <span>Tableau de bord</span>
+      </mat-list-item>
+      
+      <mat-list-item (click)="navigateTo('users')" class="nav-item">
+        <mat-icon mat-list-icon>people</mat-icon>
+        <span>Utilisateurs</span>
+      </mat-list-item>
+      
+      <mat-list-item (click)="navigateTo('doctors')" class="nav-item">
+        <mat-icon mat-list-icon>medical_services</mat-icon>
+        <span>Médecins</span>
+      </mat-list-item>
+      
+      <mat-list-item (click)="navigateTo('nurses')" class="nav-item">
+        <mat-icon mat-list-icon>health_and_safety</mat-icon>
+        <span>Infirmiers</span>
+      </mat-list-item>
+      
+      <mat-list-item (click)="navigateTo('parents')" class="nav-item">
+        <mat-icon mat-list-icon>family_restroom</mat-icon>
+        <span>Parents</span>
+      </mat-list-item>
+      
+      <mat-list-item (click)="navigateTo('patients')" class="nav-item">
+        <mat-icon mat-list-icon>personal_injury</mat-icon>
+        <span>Patients</span>
+      </mat-list-item>
+      
+      <mat-list-item (click)="navigateTo('forum')" class="nav-item">
+        <mat-icon mat-list-icon>forum</mat-icon>
+        <span>Forum</span>
+      </mat-list-item>
+      
+      <mat-list-item (click)="navigateTo('transplant')" class="nav-item">
+        <mat-icon mat-list-icon>favorite</mat-icon>
+        <span>Transplantations</span>
+      </mat-list-item>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="admin-content">
+    <div class="welcome-section">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Bienvenue dans le panneau d'administration</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Bonjour {{ currentUser.name }},</p>
+          <p>Utilisez le menu de gauche pour naviguer entre les différentes sections d'administration.</p>
+          <div class="stats-grid">
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <mat-icon class="stat-icon">dashboard</mat-icon>
+                <div class="stat-info">
+                  <h3>Tableau de bord</h3>
+                  <p>Vue d'ensemble de la plateforme</p>
+                </div>
+              </mat-card-content>
+            </mat-card>
+            
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <mat-icon class="stat-icon">people</mat-icon>
+                <div class="stat-info">
+                  <h3>Gestion des utilisateurs</h3>
+                  <p>Administrer tous les comptes</p>
+                </div>
+              </mat-card-content>
+            </mat-card>
+            
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <mat-icon class="stat-icon">medical_services</mat-icon>
+                <div class="stat-info">
+                  <h3>Personnel médical</h3>
+                  <p>Gérer médecins et infirmiers</p>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

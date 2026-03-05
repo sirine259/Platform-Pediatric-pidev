@@ -1,0 +1,303 @@
+<mat-toolbar color="primary" class="dashboard-toolbar">
+  <mat-toolbar-row>
+    <span class="toolbar-title">Tableau de Bord</span>
+    <span class="toolbar-spacer"></span>
+    <span class="user-info">
+      <mat-icon>person</mat-icon>
+      {{ getRoleLabel() }}: {{ currentUser?.firstName }} {{ currentUser?.lastName }}
+    </span>
+    <button mat-icon-button (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Déconnexion
+    </button>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<div class="dashboard-container">
+  <div class="welcome-section">
+    <h1>{{ getWelcomeMessage() }}</h1>
+    <p>Plateforme Médicale Pédiatrique - Gestion des Kidney Transplants Rénaux</p>
+  </div>
+
+  <div class="quick-actions">
+    <mat-card class="action-card">
+      <mat-card-header>
+        <mat-card-title>Actions Rapides</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="action-grid">
+          <button mat-raised-button 
+                  color="primary" 
+                  routerLink="/forum"
+                  class="action-button">
+            <mat-icon>forum</mat-icon>
+            Forum
+          </button>
+          
+          <button mat-raised-button 
+                  color="accent" 
+                  routerLink="/dashboard"
+                  class="action-button"
+                  *ngIf="authService.isAdmin() || authService.isDoctor()">
+            <mat-icon>medical_services</mat-icon>
+            Patients
+          </button>
+          
+          <button mat-raised-button 
+                  color="warn" 
+                  routerLink="/dashboard"
+                  class="action-button"
+                  *ngIf="authService.isAdmin()">
+            <mat-icon>admin_panel_settings</mat-icon>
+            Administration
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="stats-section">
+    <mat-card class="stats-card">
+      <mat-card-header>
+        <mat-card-title>Statistiques</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <mat-icon class="stat-icon">forum</mat-icon>
+            <div class="stat-number">0</div>
+            <div class="stat-label">Posts du Forum</div>
+          </div>
+          
+          <div class="stat-item">
+            <mat-icon class="stat-icon">people</mat-icon>
+            <div class="stat-number">0</div>
+            <div class="stat-label">Patients Actifs</div>
+          </div>
+          
+          <div class="stat-item">
+            <mat-icon class="stat-icon">medical_services</mat-icon>
+            <div class="stat-number">0</div>
+            <div class="stat-label">Kidney Transplants</div>
+          </div>
+          
+          <div class="stat-item">
+            <mat-icon class="stat-icon">event</mat-icon>
+            <div class="stat-number">0</div>
+            <div class="stat-label">Rendez-vous</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+.dashboard-container {
+  padding: 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.welcome-section {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 60px 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.welcome-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.15"/><circle cx="20" cy="60" r="0.5" fill="white" opacity="0.15"/><circle cx="80" cy="40" r="0.5" fill="white" opacity="0.15"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+  opacity: 0.3;
+}
+
+.welcome-section h1 {
+  margin: 0 0 16px 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-section p {
+  margin: 0;
+  opacity: 0.95;
+  font-size: 1.2rem;
+  font-weight: 400;
+  position: relative;
+  z-index: 1;
+}
+
+.quick-actions {
+  margin-bottom: 40px;
+}
+
+.action-card {
+  margin-bottom: 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.action-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px;
+  min-height: 140px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.action-button:hover::before {
+  opacity: 1;
+}
+
+.action-button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+
+.action-button mat-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 16px;
+  transition: transform 0.3s ease;
+}
+
+.action-button:hover mat-icon {
+  transform: scale(1.1);
+}
+
+.stats-section {
+  margin-bottom: 40px;
+}
+
+.stats-card {
+  margin-bottom: 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 32px 24px;
+  border: 2px solid #f1f5f9;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.stat-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+  border-color: #667eea;
+  background: linear-gradient(135deg, #ffffff 0%, #eef2ff 100%);
+}
+
+.stat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #667eea;
+  margin-bottom: 16px;
+  transition: transform 0.3s ease;
+}
+
+.stat-item:hover .stat-icon {
+  transform: scale(1.1);
+  color: #5a67d8;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-label {
+  font-size: 1rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 0 16px;
+  }
+  
+  .action-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .welcome-section {
+    padding: 40px 24px;
+  }
+  
+  .welcome-section h1 {
+    font-size: 2rem;
+  }
+  
+  .welcome-section p {
+    font-size: 1rem;
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+  }
+}
+</style>

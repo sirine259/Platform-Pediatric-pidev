@@ -1,0 +1,83 @@
+<div class="home-container">
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-background"></div>
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">
+          Plateforme Médicale
+          <span class="highlight">Pédiatrique</span>
+        </h1>
+
+        <div class="hero-actions">
+          <button mat-raised-button
+                  color="primary"
+                  class="cta-button"
+                  (click)="goToPlatform()">
+            <mat-icon>login</mat-icon>
+            Accès à la plateforme
+          </button>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <mat-icon class="hero-icon">medical_services</mat-icon>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="container">
+      <h2 class="section-title">Nos Services</h2>
+      <div class="features-grid">
+
+        <!-- Forum -->
+        <div class="feature-card">
+          <mat-icon class="feature-icon">forum</mat-icon>
+          <h3>Forum Pédiatrique</h3>
+          <p>Espace de discussion sur les transplantations pédiatriques</p>
+          <button mat-button color="primary"
+                  (click)="goToPlatform()">
+            Accéder aux forums
+          </button>
+        </div>
+
+        <!-- Kidney Transplant -->
+        <div class="feature-card">
+          <mat-icon class="feature-icon">medical_services</mat-icon>
+          <h3>Kidney Transplantation Rénales</h3>
+          <p>Suivi complet des transplantations pédiatriques</p>
+          <button mat-button color="primary"
+                  (click)="goToPlatform()">
+            Gérer les transplantations
+          </button>
+        </div>
+
+        <!-- Communauté -->
+        <div class="feature-card">
+          <mat-icon class="feature-icon">people</mat-icon>
+          <h3>Communauté Pédiatrique</h3>
+          <p>Réseau de professionnels et familles spécialisés en néphrologie pédiatrique</p>
+          <button mat-button color="primary"
+                  (click)="goToPlatform()">
+            Rejoindre la communauté
+          </button>
+        </div>
+
+        <!-- Sécurité -->
+        <div class="feature-card">
+          <mat-icon class="feature-icon">security</mat-icon>
+          <h3>Sécurité & Confidentialité</h3>
+          <p>Protection complète des données médicales des patients</p>
+          <button mat-button color="primary"
+                  (click)="goToPlatform()">
+            En savoir plus
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</div>

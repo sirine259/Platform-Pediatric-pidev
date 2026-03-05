@@ -1,0 +1,179 @@
+<div class="forum-container">
+  <div class="forum-header">
+    <h1 class="forum-title">Gestion du Forum</h1>
+    <button mat-raised-button class="add-post-btn" (click)="addPost()">
+      <mat-icon>add</mat-icon>
+      Nouveau Post
+    </button>
+  </div>
+
+  <div class="stats-grid">
+    <mat-card class="stat-card">
+      <h3>Total Posts</h3>
+      <div class="stat-value">{{ posts.length }}</div>
+      <div class="stat-label">Posts publiés</div>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <h3>Posts Publiés</h3>
+      <div class="stat-value">{{ publishedPostsCount }}</div>
+      <div class="stat-label">En ligne</div>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <h3>En Attente</h3>
+      <div class="stat-value">{{ pendingPostsCount }}</div>
+      <div class="stat-label">Modération</div>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <h3>Catégories</h3>
+      <div class="stat-value">{{ categories.length }}</div>
+      <div class="stat-label">Thèmes actifs</div>
+    </mat-card>
+  </div>
+
+  <div class="filter-section">
+    <div class="filter-form">
+      <mat-form-field class="filter-field">
+        <mat-label>Rechercher</mat-label>
+        <input matInput [(ngModel)]="searchTerm" (keyup)="applyFilter()" placeholder="Titre, auteur...">
+      </mat-form-field>
+      
+      <mat-form-field class="filter-field">
+        <mat-label>Catégorie</mat-label>
+        <mat-select>
+          <mat-option value="">Toutes</mat-option>
+          <mat-option value="Traitement">Traitement</mat-option>
+          <mat-option value="Témoignages">Témoignages</mat-option>
+          <mat-option value="Nutrition">Nutrition</mat-option>
+          <mat-option value="Questions générales">Questions générales</mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <mat-form-field class="filter-field">
+        <mat-label>Statut</mat-label>
+        <mat-select>
+          <mat-option value="">Tous</mat-option>
+          <mat-option value="published">Publié</mat-option>
+          <mat-option value="pending">En attente</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="forum-table">
+    <div class="table-header">
+      <h2 class="table-title">Liste des Posts</h2>
+    </div>
+    
+    <div *ngIf="isLoading" class="loading-spinner">
+      <mat-spinner></mat-spinner>
+    </div>
+    
+    <div *ngIf="!isLoading && posts.length === 0" class="empty-state">
+      <mat-icon>forum</mat-icon>
+      <p>Aucun post enregistré</p>
+    </div>
+    
+    <table mat-table *ngIf="!isLoading && posts.length > 0" [dataSource]="posts">
+      <!-- ID Column -->
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef>ID</th>
+        <td mat-cell *matCellDef="let post">{{ post.id }}</td>
+      </ng-container>
+
+      <!-- Title Column -->
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef>Titre</th>
+        <td mat-cell *matCellDef="let post">
+          <div class="post-info">
+            <span class="post-title">{{ post.title }}</span>
+            <span class="post-author">par {{ post.author }}</span>
+            <span class="post-date">{{ post.date | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Author Column -->
+      <ng-container matColumnDef="author">
+        <th mat-header-cell *matHeaderCellDef>Auteur</th>
+        <td mat-cell *matCellDef="let post">{{ post.author }}</td>
+      </ng-container>
+
+      <!-- Category Column -->
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef>Catégorie</th>
+        <td mat-cell *matCellDef="let post">
+          <span [class]="getCategoryClass(post.category)">
+            {{ post.category }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Date Column -->
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>Date</th>
+        <td mat-cell *matCellDef="let post">{{ post.date | date:'dd/MM/yyyy' }}</td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Statut</th>
+        <td mat-cell *matCellDef="let post">
+          <span [class]="getStatusClass(post.status)">
+            {{ post.status === 'published' ? 'Publié' : 'En attente' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let post">
+          <div class="action-buttons">
+            <button mat-icon-button class="action-btn view" (click)="viewDetails(post.id)" matTooltip="Voir détails">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button mat-icon-button class="action-btn comments" (click)="viewComments(post.id)" matTooltip="Commentaires">
+              <mat-icon>comment</mat-icon>
+            </button>
+            <button mat-icon-button class="action-btn edit" (click)="editPost(post.id)" matTooltip="Modifier">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button class="action-btn" (click)="toggleStatus(post)" matTooltip="Changer statut">
+              <mat-icon>sync</mat-icon>
+            </button>
+            <button mat-icon-button class="action-btn delete" (click)="deletePost(post.id)" matTooltip="Supprimer">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
+  <!-- Categories Overview -->
+  <div class="stats-grid" style="margin-top: 32px;">
+    <mat-card class="stat-card" style="cursor: pointer;" (click)="addPost()">
+      <h3>Nouveau Post</h3>
+      <div class="stat-value">+</div>
+      <div class="stat-label">Ajouter un post</div>
+    </mat-card>
+    
+    <mat-card class="stat-card" style="cursor: pointer;">
+      <h3>Modération</h3>
+      <div class="stat-value">{{ pendingPostsCount }}</div>
+      <div class="stat-label">Posts en attente</div>
+    </mat-card>
+    
+    <mat-card class="stat-card" style="cursor: pointer;">
+      <h3>Commentaires</h3>
+      <div class="stat-value">{{ posts.length * 5 }}</div>
+      <div class="stat-label">Total des commentaires</div>
+    </mat-card>
+  </div>
+</div>
