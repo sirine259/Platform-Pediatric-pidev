@@ -1,0 +1,159 @@
+<div class="card">
+  <div class="card-header">
+    <h4 class="card-title mb-0">{{ config.title || 'Liste' }}</h4>
+    <div class="header-actions">
+      <button *ngIf="config.createRoute && hasPermission('create')" 
+              class="btn btn-primary btn-sm" 
+              [routerLink]="config.createRoute">
+        <i class="fas fa-plus"></i> Nouveau
+      </button>
+    </div>
+  </div>
+  
+  <div class="card-body">
+    <!-- Search Bar -->
+    <div *ngIf="config.searchEnabled" class="row mb-3">
+      <div class="col-md-6">
+        <div class="input-group">
+          <input type="text" 
+                 class="form-control" 
+                 placeholder="Rechercher..." 
+                 [(ngModel)]="searchTerm"
+                 (input)="onSearch()">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="text-center py-5">
+      <div class="spinner-border" role="status">
+        <span class="sr-only">Chargement...</span>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="alert alert-danger">
+      <i class="fas fa-exclamation-triangle"></i> {{ error }}
+    </div>
+
+    <!-- Data Table -->
+    <div *ngIf="!loading && !error">
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th *ngFor="let col of columns">
+                {{ col.label }}
+                <i *ngIf="col.sortable" class="fas fa-sort ml-1"></i>
+              </th>
+              <th *ngIf="config.deleteEnabled || hasPermission('edit') || hasPermission('view')">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of getPaginatedItems()">
+              <td *ngFor="let col of columns">
+                <ng-container *ngIf="col.type === 'text' || col.type === 'number'">
+                  {{ formatValue(getNestedValue(item, col.key), col) }}
+                </ng-container>
+                
+                <ng-container *ngIf="col.type === 'date'">
+                  {{ formatValue(getNestedValue(item, col.key), col) }}
+                </ng-container>
+                
+                <ng-container *ngIf="col.type === 'badge'">
+                  <span class="badge {{ getBadgeClass(getNestedValue(item, col.key), col) }}">
+                    {{ getBadgeText(getNestedValue(item, col.key), col) }}
+                  </span>
+                </ng-container>
+                
+                <ng-container *ngIf="col.type === 'boolean'">
+                  <i class="fas" 
+                     [class.fa-check-circle]="getNestedValue(item, col.key)"
+                     [class.fa-times-circle]="!getNestedValue(item, col.key)"
+                     [class.text-success]="getNestedValue(item, col.key)"
+                     [class.text-danger]="!getNestedValue(item, col.key)"></i>
+                  {{ formatValue(getNestedValue(item, col.key), col) }}
+                </ng-container>
+              </td>
+              
+              <!-- Actions Column -->
+              <td *ngIf="config.deleteEnabled || hasPermission('edit') || hasPermission('view')">
+                <div class="btn-group" role="group">
+                  <!-- View -->
+                  <button *ngIf="hasPermission('view')" 
+                          class="btn btn-sm btn-info" 
+                          [routerLink]="[config.viewRoute, item.id]"
+                          title="Voir les détails">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  
+                  <!-- Edit -->
+                  <button *ngIf="hasPermission('edit')" 
+                          class="btn btn-sm btn-warning" 
+                          [routerLink]="[config.editRoute, item.id]"
+                          title="Modifier">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  
+                  <!-- Delete -->
+                  <button *ngIf="config.deleteEnabled && hasPermission('delete')" 
+                          class="btn btn-sm btn-danger" 
+                          (click)="onDelete(item)"
+                          title="Supprimer">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="getPaginatedItems().length === 0" class="text-center py-5">
+        <i class="fas fa-inbox fa-3x text-muted"></i>
+        <h5 class="mt-3">Aucune donnée trouvée</h5>
+        <p class="text-muted">Aucun élément ne correspond à votre recherche.</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="config.paginationEnabled && getTotalPages() > 1" class="d-flex justify-content-between align-items-center mt-3">
+      <div class="text-muted">
+        Affichage de {{ ((currentPage - 1) * itemsPerPage) + 1 }} à {{ Math.min(currentPage * itemsPerPage, totalItems) }} 
+        sur {{ totalItems }} éléments
+      </div>
+      
+      <nav>
+        <ul class="pagination mb-0">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <button class="page-link" (click)="onPageChange(currentPage - 1)">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+          </li>
+          
+          <li *ngFor="let page of getPaginationPages()" 
+              class="page-item" 
+              [class.active]="currentPage === page">
+            <button class="page-link" (click)="onPageChange(page)">
+              {{ page }}
+            </button>
+          </li>
+          
+          <li class="page-item" [class.disabled]="currentPage === getTotalPages()">
+            <button class="page-link" (click)="onPageChange(currentPage + 1)">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>

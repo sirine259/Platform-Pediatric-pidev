@@ -1,0 +1,145 @@
+<div class="forum-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="sr-only">Chargement...</span>
+    </div>
+    <p class="mt-2">Chargement du forum...</p>
+  </div>
+
+  <!-- Forum Content -->
+  <div *ngIf="!isLoading && forum" class="forum-content">
+    <!-- Forum Header -->
+    <div class="forum-header">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <button class="btn btn-outline-secondary mb-3" (click)="goBack()">
+            <i class="fas fa-arrow-left"></i> Retour aux forums
+          </button>
+          <h1 class="forum-title">
+            <i class="fas fa-comments-medical"></i>
+            {{ forum.name || 'Forum Pédiatrique' }}
+          </h1>
+          <p class="forum-description">{{ forum.description || 'Espace de discussion pour la communauté pédiatrique' }}</p>
+          <div class="forum-meta">
+            <span class="badge bg-primary">
+              <i class="fas fa-users"></i> {{ forum.memberCount || 0 }} membres
+            </span>
+            <span class="badge bg-info">
+              <i class="fas fa-comments"></i> {{ posts.length }} posts
+            </span>
+            <span class="badge bg-secondary">
+              <i class="fas fa-calendar"></i> Créé le {{ forum.createdAt | date:'longDate' }}
+            </span>
+          </div>
+        </div>
+        <div class="col-md-4 text-end">
+          <button class="btn btn-primary btn-lg" (click)="createPost()">
+            <i class="fas fa-plus"></i> Créer un Post
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Posts Section -->
+    <div class="posts-section">
+      <div class="section-header">
+        <h3><i class="fas fa-list"></i> Posts du Forum</h3>
+        <div class="posts-stats">
+          <span class="text-muted">{{ posts.length }} posts publiés</span>
+        </div>
+      </div>
+
+      <!-- Posts List -->
+      <div *ngIf="posts.length > 0; else noPosts" class="posts-list">
+        <div *ngFor="let post of posts" class="post-card">
+          <div class="post-header">
+            <div class="post-author">
+              <div class="author-avatar">
+                <i class="fas fa-user-circle"></i>
+              </div>
+              <div class="author-info">
+                <h6 class="author-name">{{ post.author?.userName || 'Anonyme' }}</h6>
+                <small class="post-date">{{ getTimeAgo(post.createdAt) }}</small>
+              </div>
+            </div>
+            <div class="post-meta">
+              <span class="badge" [class]="'bg-' + getPostTypeColor(post.postType)">
+                {{ getPostTypeLabel(post.postType) }}
+              </span>
+              <div class="post-actions">
+                <button class="btn btn-sm btn-outline-primary" 
+                        (click)="viewPostDetails(post.id)" 
+                        title="Voir détails">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" 
+                        (click)="updatePost(post.id)" 
+                        title="Modifier">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" 
+                        (click)="deletePost(post.id)" 
+                        title="Supprimer">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="post-content">
+            <h5 class="post-title">{{ post.title }}</h5>
+            <p class="post-excerpt">{{ post.content }}</p>
+            
+            <!-- Post Image if exists -->
+            <div *ngIf="post.picture" class="post-image-container">
+              <img [src]="'http://localhost:8080/api/posts/images/' + post.picture" 
+                   class="post-image" 
+                   alt="Image du post">
+            </div>
+          </div>
+
+          <div class="post-footer">
+            <div class="post-stats">
+              <span class="stat-item">
+                <i class="fas fa-heart"></i> {{ post.likeCount || 0 }}
+              </span>
+              <span class="stat-item">
+                <i class="fas fa-eye"></i> {{ post.viewCount || 0 }}
+              </span>
+              <span class="stat-item">
+                <i class="fas fa-comments"></i> {{ post.comments?.length || 0 }}
+              </span>
+            </div>
+            
+            <button class="btn btn-primary btn-sm" (click)="viewPostDetails(post.id)">
+              <i class="fas fa-arrow-right"></i> Lire la suite
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Posts State -->
+      <ng-template #noPosts>
+        <div class="text-center py-5">
+          <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+          <h5 class="text-muted">Aucun post dans ce forum</h5>
+          <p class="text-muted">Soyez le premier à partager quelque chose!</p>
+          <button class="btn btn-primary mt-3" (click)="createPost()">
+            <i class="fas fa-plus"></i> Créer le premier post
+          </button>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Forum Not Found -->
+  <div *ngIf="!isLoading && !forum" class="text-center py-5">
+    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+    <h4>Forum non trouvé</h4>
+    <p class="text-muted">Le forum que vous recherchez n'existe pas.</p>
+    <button class="btn btn-primary" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i> Retour aux forums
+    </button>
+  </div>
+</div>

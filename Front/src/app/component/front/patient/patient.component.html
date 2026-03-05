@@ -1,0 +1,87 @@
+<div class="patient-container">
+  <!-- Header Section -->
+  <div class="patient-header">
+    <div class="welcome-section">
+      <h1 class="welcome-title">
+        <mat-icon>child_care</mat-icon>
+        Espace Patient
+      </h1>
+      <p class="welcome-subtitle">Bienvenue, {{ currentUser.name }}</p>
+      <div class="patient-info">
+        <span class="info-badge">Âge: {{ currentUser.age }} ans</span>
+        <span class="info-badge">Groupe: {{ currentUser.bloodType }}</span>
+      </div>
+    </div>
+    
+    <div class="quick-actions">
+      <button mat-raised-button color="primary" (click)="bookAppointment()">
+        <mat-icon>calendar_today</mat-icon>
+        Prendre Rendez-vous
+      </button>
+      <button mat-raised-button color="accent" (click)="viewProfile()">
+        <mat-icon>person</mat-icon>
+        Mon Profil
+      </button>
+      <button mat-raised-button color="warn" (click)="viewTransplantInfo()">
+        <mat-icon>medical_services</mat-icon>
+        Kidney Transplantation
+      </button>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  <div class="content-section">
+    <div class="section-grid">
+      <!-- Medical Records -->
+      <div class="section-card">
+        <h2 class="section-title">
+          <mat-icon>folder_shared</mat-icon>
+          Dossier Médical
+        </h2>
+
+        <div *ngIf="isLoading" class="loading-spinner">
+          <mat-icon class="spin">refresh</mat-icon>
+          <p>Chargement du dossier...</p>
+        </div>
+
+        <div *ngIf="!isLoading" class="records-list">
+          <div *ngFor="let record of medicalRecords" class="record-item">
+            <div class="record-info">
+              <h4>{{ record.type }}</h4>
+              <p>{{ record.date }} - {{ record.doctor }}</p>
+              <span class="status-badge" [class.completed]="record.status === 'Completed'">
+                {{ record.status === 'Completed' ? 'Terminé' : 'En attente' }}
+              </span>
+            </div>
+            <button mat-button color="primary" (click)="viewMedicalRecord(record)">
+              <mat-icon>visibility</mat-icon>
+              Voir
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointments -->
+      <div class="section-card">
+        <h2 class="section-title">
+          <mat-icon>event</mat-icon>
+          Rendez-vous
+        </h2>
+
+        <div class="appointments-list">
+          <div *ngFor="let appointment of appointments" class="appointment-item">
+            <div class="appointment-info">
+              <h4>{{ appointment.type }}</h4>
+              <p>{{ appointment.date }} à {{ appointment.time }}</p>
+              <span class="doctor-name">{{ appointment.doctor }}</span>
+            </div>
+            <button mat-button color="accent">
+              <mat-icon>edit</mat-icon>
+              Modifier
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,292 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <mat-card class="post-card">
+        <mat-card-header class="card-header">
+          <mat-card-title class="card-title">
+            <mat-icon class="title-icon">create</mat-icon>
+            Créer un Nouveau Post
+          </mat-card-title>
+          <mat-card-subtitle>
+            Partagez votre expérience ou posez vos questions
+          </mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <form [formGroup]="postForm" (ngSubmit)="onSubmit()" class="post-form">
+            
+            <!-- Section Informations Post -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <mat-icon>article</mat-icon>
+                Contenu du Post
+              </h3>
+              
+              <div class="row mb-3">
+                <div class="col-12">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Titre du Post</mat-label>
+                    <input matInput formControlName="title" 
+                           placeholder="Entrez un titre clair et descriptif">
+                    <mat-icon matSuffix>title</mat-icon>
+                    <mat-error *ngIf="title?.hasError('required')">
+                      Le titre est requis
+                    </mat-error>
+                    <mat-error *ngIf="title?.hasError('minlength')">
+                      Le titre doit contenir au moins 3 caractères
+                    </mat-error>
+                    <mat-error *ngIf="title?.hasError('maxlength')">
+                      Le titre ne peut pas dépasser 100 caractères
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+              
+              <div class="row mb-3">
+                <div class="col-12">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Contenu du Post</mat-label>
+                    <textarea matInput formControlName="content" 
+                              rows="6" 
+                              placeholder="Décrivez votre expérience, votre question ou votre conseil..."></textarea>
+                    <mat-icon matSuffix>description</mat-icon>
+                    <mat-hint align="end">{{ content?.value?.length || 0 }}/2000 caractères</mat-hint>
+                    <mat-error *ngIf="content?.hasError('required')">
+                      Le contenu est requis
+                    </mat-error>
+                    <mat-error *ngIf="content?.hasError('minlength')">
+                      Le contenu doit contenir au moins 10 caractères
+                    </mat-error>
+                    <mat-error *ngIf="content?.hasError('maxlength')">
+                      Le contenu ne peut pas dépasser 2000 caractères
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section Paramètres -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <mat-icon>settings</mat-icon>
+                Paramètres du Post
+              </h3>
+              
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Type de Post</mat-label>
+                    <mat-select formControlName="postType">
+                      <mat-option value="">Sélectionnez un type</mat-option>
+                      <mat-option *ngFor="let option of postTypes" 
+                                   [value]="option.value">
+                        {{ option.label }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix>category</mat-icon>
+                    <mat-error *ngIf="postType?.hasError('required')">
+                      Le type de post est requis
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+                
+                <div class="col-md-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Forum</mat-label>
+                    <mat-select formControlName="forumId">
+                      <mat-option value="1">Transplantations Rénales</mat-option>
+                      <mat-option value="2">Dialyse Pédiatrique</mat-option>
+                      <mat-option value="3">Expériences Parents</mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix>forum</mat-icon>
+                    <mat-error *ngIf="forumId?.hasError('required')">
+                      Le forum est requis
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+              
+              <div class="row mb-3">
+                <div class="col-12">
+                  <mat-checkbox formControlName="isAnonymous" class="mb-2">
+                    <mat-icon class="checkbox-icon">person_off</mat-icon>
+                    Publier anonymement
+                  </mat-checkbox>
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+              <div class="row">
+                <div class="col-12">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="left-actions">
+                      <button mat-button type="button" 
+                              (click)="resetForm()"
+                              [disabled]="isSubmitting">
+                        <mat-icon>refresh</mat-icon>
+                        Réinitialiser
+                      </button>
+                    </div>
+                    
+                    <div class="right-actions">
+                      <button mat-button type="button" 
+                              (click)="cancel()"
+                              [disabled]="isSubmitting">
+                        <mat-icon>close</mat-icon>
+                        Annuler
+                      </button>
+                      
+                      <button mat-raised-button 
+                              color="primary" 
+                              type="submit" 
+                              [disabled]="postForm.invalid || isSubmitting">
+                        <mat-icon *ngIf="!isSubmitting">send</mat-icon>
+                        <mat-icon *ngIf="isSubmitting" class="spin">refresh</mat-icon>
+                        {{ isSubmitting ? 'Publication en cours...' : 'Publier le Post' }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
+
+<!-- Styles additionnels -->
+<style>
+.post-card {
+  max-width: 100%;
+  margin: 0 auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 24px;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.title-icon {
+  margin-right: 12px;
+  font-size: 2rem;
+}
+
+.post-form {
+  padding: 24px;
+}
+
+.form-section {
+  margin-bottom: 32px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  border-left: 4px solid #667eea;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.section-title mat-icon {
+  margin-right: 8px;
+  color: #667eea;
+}
+
+.checkbox-icon {
+  margin-right: 8px;
+  font-size: 18px;
+  vertical-align: middle;
+}
+
+.form-actions {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.left-actions, .right-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.mat-mdc-form-field-flex {
+  background-color: white;
+  border-radius: 8px;
+}
+
+.mat-mdc-form-field-appearance-outline .mdc-text-field--outlined {
+  background-color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .post-card {
+    margin: 16px;
+  }
+  
+  .post-form {
+    padding: 16px;
+  }
+  
+  .form-section {
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .form-actions .d-flex {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .right-actions {
+    justify-content: center;
+  }
+}
+
+/* Material Design overrides */
+.mat-mdc-raised-button {
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 8px 24px;
+}
+
+.mat-mdc-outlined-button {
+  border-radius: 8px;
+  padding: 8px 16px;
+}
+
+.mat-mdc-checkbox {
+  margin-bottom: 12px;
+}
+</style>

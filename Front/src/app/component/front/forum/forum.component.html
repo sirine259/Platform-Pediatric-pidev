@@ -1,0 +1,622 @@
+<div class="top">
+  <h1 class="post-list-title" style="font-weight: bold; background: linear-gradient(to right, #ff3737, #ff6969); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+    List of posts
+  </h1>
+
+  <div class="search-container">
+    <div class="search-box">
+      <input 
+        type="text" 
+        placeholder="Search by post title..." 
+        [(ngModel)]="searchTerm" 
+        (input)="filterPosts()" 
+        class="search-input"
+        style="border-radius: 30px; padding: 10px 20px 10px 40px; background-color: #f9f9f9; border: 2px solid #ccc; outline: none; transition: all 0.3s ease;"
+      />
+      <i style="position: absolute; top: 12px; left: 15px;" class="fa fa-search search-icon"></i>
+    </div>
+  </div>
+  
+  <button style="position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background-color: #ff6969; color: #fff; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); transition: transform 0.3s ease;" 
+          routerLink="/forum/post-create" class="btn btn-primary"
+          onmouseover="this.style.transform='scale(1.1)';" 
+          onmouseout="this.style.transform='scale(1)';">
+    <mat-icon style="vertical-align: middle; margin-right: 6px; font-size: 20px; width: 20px; height: 20px;">add</mat-icon>
+    Add post
+  </button>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="post-list">
+        <div *ngIf="filteredPosts.length > 0; else noPosts">
+          <div *ngFor="let post of getPaginatedPosts()" class="post">
+            <div class="post-header">
+              <div class="post-avatar">
+                <img src="https://picsum.photos/50/50" alt="avatar">
+              </div>
+              <div class="post-info">
+                <h3 class="post-author">By {{ post.user?.userName || 'Anonymous' }}</h3>
+                <p class="post-date">{{ post.datePost | date:'short' }}</p>
+              </div>
+              
+              <!-- Pin Button -->
+              <button 
+                (click)="isPinned(post.id) ? unpinPost(post.id) : pinPost(post.id)" 
+                title="{{ isPinned(post.id) ? 'Unpin Post' : 'Pin Post' }}"
+                class="btn btn-sm"
+                style="background: none; border: none; color: #ff6969; font-size: 18px; position: relative; top: -20px;">
+                <i class="fa fa-thumb-tack" 
+                   [ngClass]="{ 'text-muted': !isPinned(post.id) }" 
+                   aria-hidden="true"></i>
+              </button>
+            </div>
+
+            <div class="post-content">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <p class="post-title" style="margin: 0;">{{ post.subject }}</p>
+                <button class="speak-btn" (click)="speakPost(post)" title="Écouter le post">
+                  🔊
+                </button>
+              </div>
+        
+              <p>{{ post.content }}</p>
+              <div class="post-image-container" *ngIf="post.picture">
+                <img [src]="'http://localhost:9091/stage/Post/uploads/'+ post.picture" alt="Post Image" class="post-image" />
+              </div>
+            </div>
+            
+            <hr style="border-top: 1px solid #ccc; margin: 20px 0;">
+            
+            <div class="post-actions" style="display: flex; justify-content: center; padding: 0 50px;">
+              <div class="reaction-container">
+                <button class="like-button" 
+                        (click)="$event.stopPropagation(); toggleReactions(post.id!)">
+                  <i [ngClass]="getReactionIcon(post.likePost || null)"></i> {{ post.likePost || 'Like' }}
+                </button>
+
+                <div class="reaction-box" *ngIf="activePostId === post.id" (click)="$event.stopPropagation()">
+                  <button *ngFor="let reaction of reactions" 
+                          (click)="$event.stopPropagation(); handleReactionClick(post.id!, reaction.type)"
+                          [title]="reaction.label">
+                    <i [ngClass]="reaction.icon"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <button (click)="deletePost(post.id!)" class="icon-button delete-button" style="background-color: #ff6969; margin: 0 5px;">
+                <i class="fa fa-trash"></i>
+              </button>
+              <button (click)="getPostDetails(post.id!)" class="icon-button view-button" style="background-color: #ff6969; margin: 0 5px;">
+                <i class="fa fa-eye"></i>
+              </button>
+              <button (click)="updatePost(post.id!)" class="icon-button update-button" style="background-color: #ff6969; margin: 0 5px;">
+                <i class="fa fa-pencil"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-content" *ngIf="!dashboardLoading && dashboardData">
+      <!-- Quick Stats -->
+      <div class="quick-stats">
+        <mat-card class="stat-card">
+          <mat-card-header>
+            <mat-card-title>Posts</mat-card-title>
+            <mat-icon color="primary">forum</mat-icon>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="stat-number">{{ getQuickStats().posts }}</div>
+            <div class="stat-subtitle">Total des posts</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-header>
+            <mat-card-title>Commentaires</mat-card-title>
+            <mat-icon color="accent">comment</mat-icon>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="stat-number">{{ getQuickStats().comments }}</div>
+            <div class="stat-subtitle">Total des commentaires</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-header>
+            <mat-card-title>Likes</mat-card-title>
+            <mat-icon color="warn">favorite</mat-icon>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="stat-number">{{ getQuickStats().likes }}</div>
+            <div class="stat-subtitle">Total des likes</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-header>
+            <mat-card-title>Engagement</mat-card-title>
+            <mat-icon color="primary">trending_up</mat-icon>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="stat-number">{{ getQuickStats().engagement | number:'1.1' }}%</div>
+            <div class="stat-subtitle">Taux d'engagement</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      
+      <!-- Local Stats -->
+      <div class="local-stats">
+        <mat-card class="section-card">
+          <mat-card-header>
+            <mat-card-title>Posts Tendance du Jour</mat-card-title>
+            <mat-icon>trending_up</mat-icon>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="trending-list" *ngIf="getTodayTrending().length > 0; else noTrending">
+              <div *ngFor="let post of getTodayTrending()" class="trending-item">
+                <strong>{{ post.subject }}</strong>
+                <span>Score: {{ calculatePostScore(post) | number:'1.1' }}</span>
+              </div>
+            </div>
+            <ng-template #noTrending>
+              <p class="no-data">Aucun post tendance aujourd'hui</p>
+            </ng-template>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="section-card">
+          <mat-card-header>
+            <mat-card-title>Utilisateurs les Plus Actifs</mat-card-title>
+            <mat-icon>people</mat-icon>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="users-list" *ngIf="getTopUsersLocal().length > 0; else noUsers">
+              <div *ngFor="let user of getTopUsersLocal()" class="user-item">
+                <strong>{{ user.name }}</strong>
+                <div class="user-stats">
+                  <span>{{ user.posts }} posts</span>
+                  <span>{{ user.comments }} commentaires</span>
+                </div>
+              </div>
+            </div>
+            <ng-template #noUsers>
+              <p class="no-data">Aucune activité utilisateur</p>
+            </ng-template>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Action Button -->
+  <button mat-fab 
+          color="primary" 
+          class="fab-add-post"
+          routerLink="/forum/post-create"
+          matTooltip="Ajouter un post">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>
+
+<ng-template #noPosts>
+  <div class="no-posts-block">
+    <p class="no-posts-message">Aucun post pour le moment.</p>
+    <p class="no-posts-hint">Cliquez sur le bouton <strong>Add</strong> (en bas à droite) ou sur le bouton ci-dessous pour créer votre premier post.</p>
+    <a mat-raised-button color="primary" routerLink="/forum/post-create" class="btn-add-first">
+      <mat-icon>add</mat-icon>
+      Ajouter un post
+    </a>
+  </div>
+</ng-template>
+<style>
+.forum-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.forum-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: white;
+}
+
+.forum-title {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.forum-title mat-icon {
+  margin-right: 12px;
+  font-size: 2rem;
+}
+
+.search-container {
+  min-width: 300px;
+}
+
+.search-field {
+  width: 100%;
+}
+
+.add-post-section {
+  margin-bottom: 30px;
+}
+
+.add-post-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.anon-checkbox {
+  margin-bottom: 16px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.posts-section {
+  margin-top: 30px;
+}
+
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.post-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+
+.post-card.pinned {
+  border: 2px solid #667eea;
+  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.2);
+}
+
+.post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.post-card.pinned::before {
+  content: '📌';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  background: #667eea;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  z-index: 10;
+}
+
+.post-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.post-author, .post-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.author-icon, .date-icon {
+  font-size: 16px;
+  color: #667eea;
+}
+
+.pin-button {
+  margin-left: auto;
+}
+
+.post-subject {
+  color: #333;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 16px 0 12px 0;
+}
+
+.post-content {
+  color: #666;
+  line-height: 1.6;
+  margin: 0 0 16px 0;
+}
+
+.post-image {
+  margin: 16px 0;
+}
+
+.post-image img {
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.post-actions {
+  border-top: 1px solid #eee;
+  padding: 16px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.reactions-menu {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.reactions-container {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.reaction-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 20px;
+  transition: all 0.2s;
+}
+
+.reaction-btn:hover {
+  background: #e3f2fd;
+  transform: scale(1.05);
+}
+
+.comments-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.comments-section h4 {
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.add-comment {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+
+.comment-input {
+  flex: 1;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.comment {
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border-left: 3px solid #667eea;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.comment-author {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.comment-icon, .reply-icon {
+  font-size: 14px;
+  color: #667eea;
+}
+
+.comment-date {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.vote-buttons {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.vote-buttons button {
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+}
+
+.comment-content {
+  margin: 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+.reply-section {
+  margin-top: 12px;
+}
+
+.reply-toggle {
+  font-size: 0.8rem;
+  padding: 4px 8px;
+}
+
+.reply-form {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f0f0f0;
+  border-radius: 8px;
+}
+
+.reply-input {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.replies-list {
+  margin-top: 12px;
+  padding-left: 20px;
+  border-left: 2px solid #ddd;
+}
+
+.reply {
+  background: #fff;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  border-left: 2px solid #28a745;
+}
+
+.reply-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+}
+
+.reply-date {
+  color: #666;
+}
+
+.reply-content {
+  margin: 0;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  height: 4rem;
+  width: 4rem;
+  color: #ccc;
+  margin-bottom: 20px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 30px;
+  padding: 20px;
+}
+
+.page-info {
+  font-weight: 500;
+  color: #666;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .forum-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .search-container {
+    min-width: 100%;
+  }
+  
+  .post-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .action-buttons {
+    justify-content: center;
+  }
+  
+  .add-comment {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+.no-posts-message {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 8px;
+}
+.no-posts-hint {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 20px;
+  max-width: 400px;
+}
+.no-posts-block {
+  text-align: center;
+  padding: 40px 20px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  border: 1px dashed #ccc;
+}
+.btn-add-first {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+</style>
