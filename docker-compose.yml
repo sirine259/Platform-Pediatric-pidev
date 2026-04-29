@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  eureka-server:
+    build:
+      context: ./Back/eureka-server
+      dockerfile: Dockerfile
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - pediatric-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  api-gateway:
+    build:
+      context: ./Back/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - pediatric-net
+
+  kidneytransplant-forum-service:
+    build:
+      context: ./Back
+      dockerfile: Dockerfile
+    container_name: kidneytransplant-forum-service
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    ports:
+      - "8091:8091"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - pediatric-net
+
+  frontend:
+    build:
+      context: ./Front
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - pediatric-net
+
+networks:
+  pediatric-net:
+
