@@ -49,7 +49,7 @@ pipeline {
 
     stage("Build and Test Frontend") {
       steps {
-        sh "cd Front && npm ci && npm run test -- --watch=false --browsers=ChromeHeadless"
+        sh "cd Front && npm ci --legacy-peer-deps && npm run test -- --watch=false --browsers=ChromeHeadless"
       }
     }
 
@@ -129,3 +129,4 @@ pipeline {
     }
   }
 }
+
