@@ -8,7 +8,6 @@ pipeline {
 
   tools {
     maven "Maven3"
-    nodejs "NodeJS20"
   }
 
   environment {
@@ -50,7 +49,11 @@ pipeline {
 
     stage("Build and Test Frontend") {
       steps {
-        sh "cd Front && npm ci && npm run test -- --watch=false --browsers=ChromeHeadless"
+        sh """
+          curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+          apt-get install -y nodejs
+          cd Front && npm ci && npm run test -- --watch=false --browsers=ChromeHeadless
+        """
       }
     }
 
