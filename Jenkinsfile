@@ -27,19 +27,19 @@ pipeline {
       }
     }
 
-    stage("Build & Test Backend") {
+    stage("Build and Test Backend") {
       parallel {
-        stage("Build & Test Eureka") {
+        stage("Build and Test Eureka") {
           steps {
             sh "cd Back/eureka-server && mvn clean test -DskipTests=false"
           }
         }
-        stage("Build & Test Gateway") {
+        stage("Build and Test Gateway") {
           steps {
             sh "cd Back/api-gateway && mvn clean test -DskipTests=false"
           }
         }
-        stage("Build & Test Backend Service") {
+        stage("Build and Test Backend Service") {
           steps {
             sh "cd Back && mvn clean test -DskipTests=false"
           }
@@ -47,13 +47,13 @@ pipeline {
       }
     }
 
-    stage("Build & Test Frontend") {
+    stage("Build and Test Frontend") {
       steps {
         sh "cd Front && npm ci && npm run test -- --watch=false --browsers=ChromeHeadless"
       }
     }
 
-    stage("Build Docker Images (parallel)") {
+    stage("Build Docker Images") {
       parallel {
         stage("Build Backend Images") {
           steps {
@@ -74,7 +74,7 @@ pipeline {
       }
     }
 
-    stage("Docker Login & Push") {
+    stage("Docker Login and Push") {
       steps {
         withCredentials([usernamePassword(credentialsId: "sirine215", usernameVariable: "DOCKER_USER", passwordVariable: "DOCKER_PASS")]) {
           script {
@@ -102,18 +102,13 @@ pipeline {
           script {
             sh "kubectl --kubeconfig=$KUBECONFIG_FILE apply -f k8s/00-namespace.yaml"
             withCredentials([usernamePassword(credentialsId: "sirine215", usernameVariable: "DOCKER_USER", passwordVariable: "DOCKER_PASS")]) {
-              sh """
-                kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} delete secret dockerhub-creds --ignore-not-found
-                kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} create secret docker-registry dockerhub-creds \
-                  --docker-server=https://index.docker.io/v1/ \
-                  --docker-username=$DOCKER_USER \
-                  --docker-password=$DOCKER_PASS
-              """
+              sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} delete secret dockerhub-creds --ignore-not-found"
+              sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} create secret docker-registry dockerhub-creds --docker-server=https://index.docker.io/v1/ --docker-username=$DOCKER_USER --docker-password=$DOCKER_PASS"
             }
             sh "kubectl --kubeconfig=$KUBECONFIG_FILE apply -f k8s/"
             sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} set image deployment/eureka-server eureka-server=${IMAGE_EUREKA}:${TAG}"
             sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} rollout status deployment/eureka-server --timeout=180s"
-            sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE% set image deployment/api-gateway api-gateway=${IMAGE_GATEWAY}:${TAG}"
+            sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} set image deployment/api-gateway api-gateway=${IMAGE_GATEWAY}:${TAG}"
             sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} rollout status deployment/api-gateway --timeout=180s"
             sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} set image deployment/kidneytransplant-forum-service kidneytransplant-forum-service=${IMAGE_BACKEND}:${TAG}"
             sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} rollout status deployment/kidneytransplant-forum-service --timeout=180s"
