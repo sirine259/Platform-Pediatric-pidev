@@ -18,6 +18,8 @@ pipeline {
     IMAGE_GATEWAY = "${DOCKERHUB_USER}/pediatric-api-gateway"
     IMAGE_BACKEND = "${DOCKERHUB_USER}/pediatric-kidneytransplant-forum-service"
     IMAGE_FRONTEND = "${DOCKERHUB_USER}/pediatric-frontend"
+    SONAR_HOST_URL = "http://sonarqube:9000"
+    SONAR_PROJECT_KEY = "pediatric-platform"
   }
 
   stages {
@@ -50,6 +52,53 @@ pipeline {
     stage("Build and Test Frontend") {
       steps {
         sh "cd Front && npm ci --legacy-peer-deps"
+      }
+    }
+
+    stage("SonarQube Analysis") {
+      parallel {
+        stage("SonarQube - Eureka") {
+          steps {
+            withSonarQubeEnv(credentialsId: 'sonarqube-credentials') {
+              sh "cd Back/eureka-server && mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}-eureka -Dsonar.projectName='Eureka Server' -Dsonar.host.url=${SONAR_HOST_URL}"
+            }
+          }
+        }
+        stage("SonarQube - Gateway") {
+          steps {
+            withSonarQubeEnv(credentialsId: 'sonarqube-credentials') {
+              sh "cd Back/api-gateway && mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}-gateway -Dsonar.projectName='API Gateway' -Dsonar.host.url=${SONAR_HOST_URL}"
+            }
+          }
+        }
+        stage("SonarQube - Backend Service") {
+          steps {
+            withSonarQubeEnv(credentialsId: 'sonarqube-credentials') {
+              sh "cd Back && mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}-backend -Dsonar.projectName='Backend Service' -Dsonar.host.url=${SONAR_HOST_URL}"
+            }
+          }
+        }
+        stage("SonarQube - Frontend") {
+          steps {
+            sh "cd Front && npm install -g sonarqube-scanner"
+            withSonarQubeEnv(credentialsId: 'sonarqube-credentials') {
+              sh "cd Front && sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY}-frontend -Dsonar.projectName='Frontend' -Dsonar.sources=src -Dsonar.host.url=${SONAR_HOST_URL}"
+            }
+          }
+        }
+      }
+    }
+
+    stage("Quality Gate") {
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          script {
+            def qg = waitForQualityGate()
+            if (qg.status != 'OK') {
+              error "Quality Gate failed: ${qg.status}"
+            }
+          }
+        }
       }
     }
 
@@ -118,9 +167,23 @@ pipeline {
         }
       }
     }
-  }
 
-  post {
+    stage("Deploy Monitoring (Prometheus + Grafana)") {
+      steps {
+        withCredentials([file(credentialsId: "pediatric medical", variable: "KUBECONFIG_FILE")]) {
+          script {
+            sh "kubectl --kubeconfig=$KUBECONFIG_FILE apply -f k8s/06-prometheus.yaml"
+            sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} rollout status deployment/prometheus --timeout=120s"
+            sh "kubectl --kubeconfig=$KUBECONFIG_FILE apply -f k8s/07-grafana.yaml"
+            sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} rollout status deployment/grafana --timeout=120s"
+            echo "Prometheus available sur: http://<node-ip>:9090"
+            echo "Grafana disponible sur: http://<node-ip>:3000 (admin/admin)"
+          }
+        }
+      }
+    }
+
+    post {
     success {
       echo "Pipeline reussi - Version ${TAG} deployee dans ${NAMESPACE}"
     }
