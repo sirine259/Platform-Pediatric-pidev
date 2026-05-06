@@ -1,197 +1,108 @@
 pipeline {
   agent any
-  options {
-    timestamps()
-    disableConcurrentBuilds()
-    buildDiscarder(logRotator(numToKeepStr: "10"))
-  }
 
   tools {
     maven "Maven3"
+    nodejs "NodeJS"
   }
 
   environment {
-    NAMESPACE = "pediatric"
-    TAG = "${env.BUILD_NUMBER}"
     DOCKERHUB_USER = "sirine215"
-    IMAGE_EUREKA = "${DOCKERHUB_USER}/pediatric-eureka-server"
-    IMAGE_GATEWAY = "${DOCKERHUB_USER}/pediatric-api-gateway"
-    IMAGE_BACKEND = "${DOCKERHUB_USER}/pediatric-kidneytransplant-forum-service"
+    IMAGE_FORUM = "${DOCKERHUB_USER}/forum-service"
+    IMAGE_KIDNEY = "${DOCKERHUB_USER}/kidneytransplant-service"
     IMAGE_FRONTEND = "${DOCKERHUB_USER}/pediatric-frontend"
-    SONAR_HOST_URL = "http://sonarqube:9000"
-    SONAR_PROJECT_KEY = "pediatric-platform"
+    TAG = "${BUILD_NUMBER}"
+    NAMESPACE = "pediatric"
   }
 
   stages {
+
     stage("Checkout") {
       steps {
         checkout scm
       }
     }
 
-    stage("Build and Test Backend") {
-      parallel {
-        stage("Build and Test Eureka") {
-          steps {
-            sh "cd Back/eureka-server && mvn clean test -DskipTests=false"
-          }
-        }
-        stage("Build and Test Gateway") {
-          steps {
-            sh "cd Back/api-gateway && mvn clean test -DskipTests=false"
-          }
-        }
-        stage("Build and Test Backend Service") {
-          steps {
-            sh "cd Back && mvn clean test -DskipTests=false"
-          }
-        }
-      }
-    }
-
-    stage("Build and Test Frontend") {
+    // 🔵 BUILD FORUM
+    stage("Build Forum") {
       steps {
-        sh "cd Front && npm ci --legacy-peer-deps"
-      }
-    }
-
-    stage("SonarQube Analysis") {
-      parallel {
-        stage("SonarQube - Eureka") {
-          steps {
-            withSonarQubeEnv(credentialsId: 'sonarqube-credentials') {
-              sh "cd Back/eureka-server && mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}-eureka -Dsonar.projectName='Eureka Server' -Dsonar.host.url=${SONAR_HOST_URL}"
-            }
-          }
-        }
-        stage("SonarQube - Gateway") {
-          steps {
-            withSonarQubeEnv(credentialsId: 'sonarqube-credentials') {
-              sh "cd Back/api-gateway && mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}-gateway -Dsonar.projectName='API Gateway' -Dsonar.host.url=${SONAR_HOST_URL}"
-            }
-          }
-        }
-        stage("SonarQube - Backend Service") {
-          steps {
-            withSonarQubeEnv(credentialsId: 'sonarqube-credentials') {
-              sh "cd Back && mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}-backend -Dsonar.projectName='Backend Service' -Dsonar.host.url=${SONAR_HOST_URL}"
-            }
-          }
-        }
-        stage("SonarQube - Frontend") {
-          steps {
-            sh "cd Front && npm install -g sonarqube-scanner"
-            withSonarQubeEnv(credentialsId: 'sonarqube-credentials') {
-              sh "cd Front && sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY}-frontend -Dsonar.projectName='Frontend' -Dsonar.sources=src -Dsonar.host.url=${SONAR_HOST_URL}"
-            }
-          }
+        dir("Back/forum-service") {
+          bat "mvn clean install -DskipTests=true"
         }
       }
     }
 
-    stage("Quality Gate") {
+    // 🔵 BUILD KIDNEY
+    stage("Build Kidney") {
       steps {
-        timeout(time: 10, unit: 'MINUTES') {
-          script {
-            def qg = waitForQualityGate()
-            if (qg.status != 'OK') {
-              error "Quality Gate failed: ${qg.status}"
-            }
-          }
+        dir("Back/kidneytransplant-service") {
+          bat "mvn clean install -DskipTests=true"
         }
       }
     }
 
-    stage("Build Docker Images") {
-      parallel {
-        stage("Build Backend Images") {
-          steps {
-            script {
-              sh "docker build -t ${IMAGE_EUREKA}:${TAG} -f Back/eureka-server/Dockerfile Back/eureka-server"
-              sh "docker build -t ${IMAGE_GATEWAY}:${TAG} -f Back/api-gateway/Dockerfile Back/api-gateway"
-              sh "docker build -t ${IMAGE_BACKEND}:${TAG} -f Back/Dockerfile Back"
-            }
-          }
-        }
-        stage("Build Frontend Image") {
-          steps {
-            script {
-              sh "docker build -t ${IMAGE_FRONTEND}:${TAG} -f Front/Dockerfile Front"
-            }
-          }
-        }
-      }
-    }
-
-    stage("Docker Login and Push") {
+    // 🟢 BUILD FRONT
+    stage("Build Frontend") {
       steps {
-        withCredentials([usernamePassword(credentialsId: "sirine215", usernameVariable: "DOCKER_USER", passwordVariable: "DOCKER_PASS")]) {
-          script {
-            sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
-            sh "docker push ${IMAGE_EUREKA}:${TAG}"
-            sh "docker push ${IMAGE_GATEWAY}:${TAG}"
-            sh "docker push ${IMAGE_BACKEND}:${TAG}"
-            sh "docker push ${IMAGE_FRONTEND}:${TAG}"
-            sh "docker tag ${IMAGE_EUREKA}:${TAG} ${IMAGE_EUREKA}:latest"
-            sh "docker tag ${IMAGE_GATEWAY}:${TAG} ${IMAGE_GATEWAY}:latest"
-            sh "docker tag ${IMAGE_BACKEND}:${TAG} ${IMAGE_BACKEND}:latest"
-            sh "docker tag ${IMAGE_FRONTEND}:${TAG} ${IMAGE_FRONTEND}:latest"
-            sh "docker push ${IMAGE_EUREKA}:latest"
-            sh "docker push ${IMAGE_GATEWAY}:latest"
-            sh "docker push ${IMAGE_BACKEND}:latest"
-            sh "docker push ${IMAGE_FRONTEND}:latest"
-          }
+        dir("Front") {
+          bat "npm install --legacy-peer-deps"
+          bat "npm run build"
         }
       }
     }
 
-    stage("Deploy to Kubernetes") {
+    // 🔍 SONAR FORUM
+    stage("Sonar Forum") {
       steps {
-        withCredentials([file(credentialsId: "pediatric medical", variable: "KUBECONFIG_FILE")]) {
-          script {
-            sh "kubectl --kubeconfig=$KUBECONFIG_FILE apply -f k8s/00-namespace.yaml"
-            withCredentials([usernamePassword(credentialsId: "sirine215", usernameVariable: "DOCKER_USER", passwordVariable: "DOCKER_PASS")]) {
-              sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} delete secret dockerhub-creds --ignore-not-found"
-              sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} create secret docker-registry dockerhub-creds --docker-server=https://index.docker.io/v1/ --docker-username=$DOCKER_USER --docker-password=$DOCKER_PASS"
-            }
-            sh "kubectl --kubeconfig=$KUBECONFIG_FILE apply -f k8s/"
-            sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} set image deployment/eureka-server eureka-server=${IMAGE_EUREKA}:${TAG}"
-            sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} rollout status deployment/eureka-server --timeout=180s"
-            sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} set image deployment/api-gateway api-gateway=${IMAGE_GATEWAY}:${TAG}"
-            sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} rollout status deployment/api-gateway --timeout=180s"
-            sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} set image deployment/kidneytransplant-forum-service kidneytransplant-forum-service=${IMAGE_BACKEND}:${TAG}"
-            sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} rollout status deployment/kidneytransplant-forum-service --timeout=180s"
-            sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} set image deployment/frontend frontend=${IMAGE_FRONTEND}:${TAG}"
-            sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} rollout status deployment/frontend --timeout=180s"
+        withSonarQubeEnv('SonarQube') {
+          dir("Back/forum-service") {
+            bat "mvn sonar:sonar -Dsonar.projectKey=forum"
           }
         }
       }
     }
 
-       stage("Deploy Monitoring (Prometheus + Grafana)") {
+    // 🔍 SONAR KIDNEY
+    stage("Sonar Kidney") {
       steps {
-        withCredentials([file(credentialsId: "pediatric medical", variable: "KUBECONFIG_FILE")]) {
-          script {
-            sh "kubectl --kubeconfig=$KUBECONFIG_FILE apply -f k8s/06-prometheus.yaml"
-            sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} rollout status deployment/prometheus --timeout=120s"
-            sh "kubectl --kubeconfig=$KUBECONFIG_FILE apply -f k8s/07-grafana.yaml"
-            sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} rollout status deployment/grafana --timeout=120s"
-            echo "Prometheus disponible sur: http://<node-ip>:9090"
-            echo "Grafana disponible sur: http://<node-ip>:3000 (admin/admin)"
+        withSonarQubeEnv('SonarQube') {
+          dir("Back/kidneytransplant-service") {
+            bat "mvn sonar:sonar -Dsonar.projectKey=kidney"
           }
         }
       }
     }
 
-  } 
+    // 🐳 DOCKER BUILD
+    stage("Docker Build") {
+      steps {
+        bat "docker build -t ${IMAGE_FORUM}:${TAG} Back/forum-service"
+        bat "docker build -t ${IMAGE_KIDNEY}:${TAG} Back/kidneytransplant-service"
+        bat "docker build -t ${IMAGE_FRONTEND}:${TAG} Front"
+      }
+    }
+
+    // 🐳 PUSH
+    stage("Docker Push") {
+      steps {
+        withCredentials([usernamePassword(credentialsId: "sirine215", usernameVariable: "USER", passwordVariable: "PASS")]) {
+          bat "echo %PASS% | docker login -u %USER% --password-stdin"
+
+          bat "docker push ${IMAGE_FORUM}:${TAG}"
+          bat "docker push ${IMAGE_KIDNEY}:${TAG}"
+          bat "docker push ${IMAGE_FRONTEND}:${TAG}"
+        }
+      }
+    }
+
+  }
 
   post {
     success {
-      echo "Pipeline reussi - Version ${TAG} deployee dans ${NAMESPACE}"
+      echo "Pipeline OK ✅ Version ${TAG}"
     }
     failure {
-      echo "Pipeline echoue - Verifier les logs"
+      echo "Pipeline FAILED ❌"
     }
   }
-
-} 
+}
