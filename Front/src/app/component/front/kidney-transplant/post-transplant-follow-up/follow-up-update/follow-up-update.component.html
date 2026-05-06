@@ -1,0 +1,110 @@
+<div class="follow-up-update-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="sr-only">Chargement...</span>
+    </div>
+    <p class="mt-2">Chargement des détails du suivi...</p>
+  </div>
+
+  <!-- Follow-up Update Form -->
+  <div *ngIf="!isLoading" class="follow-up-form">
+    <div class="row">
+      <div class="col-12">
+        <div class="form-header">
+          <h2 class="form-title">
+            <i class="fas fa-stethoscope"></i> 
+            Modifier le Suivi de Kidney Transplantation
+          </h2>
+          <button class="btn btn-outline-secondary" (click)="goBack()">
+            <i class="fas fa-arrow-left"></i> Retour
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-8 mx-auto">
+        <form (ngSubmit)="onSubmit()">
+          <!-- Date -->
+          <div class="form-group">
+            <label for="date">Date du Suivi</label>
+            <input 
+              type="date" 
+              id="date" 
+              class="form-control" 
+              [(ngModel)]="followUp.date"
+              required>
+          </div>
+
+          <!-- Type -->
+          <div class="form-group">
+            <label for="type">Type de Suivi</label>
+            <select 
+              id="type" 
+              class="form-control" 
+              [(ngModel)]="followUp.type"
+              required>
+              <option value="POST_KIDNEY_TRANSPLANT">Suivi Post-Kidney Transplantation</option>
+              <option value="REJECTION">Rejet de Kidney Transplantation</option>
+              <option value="COMPLICATION">Complications</option>
+              <option value="RECOVERY">Rétablissement</option>
+            </select>
+            <div class="type-indicator">
+              <span class="badge" [ngClass]="'bg-' + getFollowUpTypeColor(followUp.type)">
+                {{ getFollowUpTypeLabel(followUp.type) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Doctor -->
+          <div class="form-group">
+            <label for="doctor">Médecin Traitant</label>
+            <input 
+              type="text" 
+              id="doctor" 
+              class="form-control" 
+              [(ngModel)]="followUp.doctor"
+              placeholder="Dr. Smith"
+              required>
+          </div>
+
+          <!-- Notes -->
+          <div class="form-group">
+            <label for="notes">Notes Médicales</label>
+            <textarea 
+              id="notes" 
+              class="form-control" 
+              [(ngModel)]="followUp.notes"
+              rows="4"
+              placeholder="Observations, symptômes, traitement..."
+              required>
+            </textarea>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="form-actions">
+            <button 
+              type="submit" 
+              class="btn btn-primary"
+              [disabled]="isSubmitting">
+              <span *ngIf="!isSubmitting">
+                <i class="fas fa-save"></i> Mettre à jour le Suivi
+              </span>
+              <span *ngIf="isSubmitting">
+                <i class="fas fa-spinner fa-spin"></i> Mise à jour en cours...
+              </span>
+            </button>
+            
+            <button 
+              type="button" 
+              (click)="goBack()" 
+              class="btn btn-secondary">
+              <i class="fas fa-times"></i> Annuler
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

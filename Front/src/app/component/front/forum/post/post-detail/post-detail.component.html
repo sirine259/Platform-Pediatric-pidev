@@ -1,0 +1,222 @@
+﻿<div class="post-detail-container">
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="sr-only">Chargement...</span>
+    </div>
+    <p class="mt-2">Chargement du post...</p>
+  </div>
+
+  <div *ngIf="!isLoading && post" class="post-content">
+    <div class="post-header">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <button class="btn btn-outline-light mb-3" (click)="goBack()">
+            <i class="fas fa-arrow-left"></i> Retour
+          </button>
+          <h1 class="post-title">{{ post.title }}</h1>
+          <div class="post-meta">
+            <span class="badge" [class]="'bg-' + getPostTypeColor(post.postType)">
+              <i class="fas" [ngClass]="getPostTypeIcon(post.postType)"></i>
+              {{ getPostTypeLabel(post.postType) }}
+            </span>
+            <span class="author-info">
+              <i class="fas fa-user"></i> {{ post.author?.userName || 'Anonyme' }}
+            </span>
+            <span class="post-date">
+              <i class="fas fa-clock"></i> {{ getTimeAgo(post.createdAt) }}
+            </span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="post-stats">
+            <span class="stat-item">
+              <i class="fas fa-heart"></i> {{ post.likeCount || 0 }}
+            </span>
+            <span class="stat-item">
+              <i class="fas fa-eye"></i> {{ post.viewCount || 0 }}
+            </span>
+            <span class="stat-item">
+              <i class="fas fa-comments"></i> {{ comments.length }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="post-body">
+      <div class="post-content-text">
+        <p>{{ post.content }}</p>
+      </div>
+      
+      <div *ngIf="post.videoUrl" class="post-video-container mt-4">
+        <div *ngIf="isYouTube(post.videoUrl)" class="ratio ratio-16x9 mb-3">
+          <iframe
+            [src]="getYouTubeEmbedUrl(post.videoUrl) | safeUrl"
+            class="post-video-iframe"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+          </iframe>
+        </div>
+        <video *ngIf="!isYouTube(post.videoUrl) && isDirectVideo(post.videoUrl)"
+               class="post-video"
+               [src]="resolveVideoUrl(post.videoUrl) | safeUrl"
+               controls>
+          Votre navigateur ne supporte pas la lecture vidÃ©o.
+        </video>
+        <a *ngIf="!isYouTube(post.videoUrl) && !isDirectVideo(post.videoUrl)"
+           [href]="post.videoUrl"
+           target="_blank"
+           rel="noopener"
+           class="btn btn-outline-primary">
+          <i class="fas fa-video"></i> Ouvrir la vidÃ©o
+        </a>
+      </div>
+      
+      <div *ngIf="post.picture" class="post-image-container mt-4">
+        <img [src]="apiUrl + '/api/posts/images/' + post.picture" 
+             class="post-image" 
+             alt="Image du post">
+      </div>
+    </div>
+
+    <div class="post-actions">
+      <button class="btn btn-primary" (click)="likePost()">
+        <i class="fas fa-heart"></i> J'aime
+      </button>
+      <button class="btn btn-secondary" (click)="updatePost()">
+        <i class="fas fa-edit"></i> Modifier
+      </button>
+      <button class="btn btn-danger" (click)="deletePost()">
+        <i class="fas fa-trash"></i> Supprimer
+      </button>
+    </div>
+
+<!-- Rating - 5 clickable stars with distribution -->
+    <div class="rating-container mt-3">
+      <h5><i class="fas fa-star text-warning"></i> Notez ce post</h5>
+      <p *ngIf="userId === null" class="text-danger mb-2">
+        Connectez-vous pour noter ce post.
+      </p>
+      <div class="stars-interactive">
+        <span *ngFor="let star of stars" 
+              class="star-btn"
+              [class.filled]="star <= userRating"
+              [class.user-voted]="star === userRating && userRating > 0"
+              [style.opacity]="userId === null ? '0.5' : '1'"
+              [style.pointer-events]="userId === null ? 'none' : 'auto'"
+              (click)="setRating(star)">
+          <i class="fas fa-star"></i>
+        </span>
+        <span class="your-vote" *ngIf="userRating > 0">Votre vote: {{ userRating }}/5</span>
+      </div>
+      
+      <!-- Rating bars with percentage -->
+      <div class="rating-bars mt-3" *ngIf="totalRatings > 0">
+        <div class="rating-bar-row" *ngFor="let star of [5,4,3,2,1]">
+          <span class="star-label">{{ star }} <i class="fas fa-star text-warning"></i></span>
+          <div class="rating-progress">
+            <div class="rating-progress-fill" 
+                 [class.has-value]="getRatingCount(star) > 0"
+                 [style.width]="getAnimatedRatingPercentage(star) + '%'">
+            </div>
+          </div>
+          <span class="rating-meta">
+            <span class="count">{{ getRatingCount(star) }} vote{{ getRatingCount(star) > 1 ? 's' : '' }}</span>
+            <span class="percentage" [class.animate-mobile]="isRatingAnimating">{{ getAnimatedRatingPercentage(star) | number:'1.0-0' }}%</span>
+          </span>
+        </div>
+      </div>
+      
+      <div class="rating-summary mt-2" *ngIf="totalRatings > 0">
+        <strong>{{ averageRating | number:'1.1-1' }}</strong> / 5 
+        <span class="text-muted">({{ totalRatings }} {{ totalRatings === 1 ? 'vote' : 'votes' }})</span>
+      </div>
+    </div>
+
+    <div class="comments-section">
+      <div class="section-header">
+        <h3>
+          <i class="fas fa-comments"></i> 
+          Commentaires ({{ comments.length }})
+        </h3>
+      </div>
+
+      <div class="add-comment">
+        <h5>
+          <i class="fas fa-pen"></i>
+          Ajouter un commentaire
+        </h5>
+        <div class="comment-form">
+          <textarea 
+            class="form-control" 
+            [(ngModel)]="newComment" 
+            placeholder="Ã‰crivez votre commentaire ici..."
+            rows="4"></textarea>
+          <div class="comment-actions">
+            <button class="btn btn-primary" 
+                    (click)="addComment()" 
+                    [disabled]="isSubmittingComment || !newComment.trim()">
+              <span *ngIf="!isSubmittingComment">
+                <i class="fas fa-paper-plane"></i> Publier
+              </span>
+              <span *ngIf="isSubmittingComment">
+                <i class="fas fa-spinner fa-spin"></i> Publication...
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="comments.length > 0" class="comments-list">
+        <div *ngFor="let comment of comments" class="comment-card">
+          <div class="comment-header">
+            <div class="comment-author">
+              <i class="fas fa-user-circle"></i>
+              <div class="author-details">
+                <strong>{{ comment.author?.userName || 'Anonyme' }}</strong>
+                <small class="comment-date">{{ getTimeAgo(comment.createdAt) }}</small>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-outline-danger" 
+                    (click)="deleteComment(comment.id)" 
+                    title="Supprimer">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+          <div class="comment-content">
+            <p>{{ comment.content }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="comments.length === 0" class="text-center py-4 empty-comments">
+        <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+        <p class="text-muted">Soyez le premier Ã  commenter !</p>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && !post" class="text-center py-5">
+    <i class="fas fa-exclamation-triangle fa-4x text-warning mb-4"></i>
+    <h4>Post non trouvÃ©</h4>
+    <p class="text-muted">Le post que vous recherchez n'existe pas.</p>
+    <button class="btn btn-primary" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i> Retour
+    </button>
+  </div>
+</div>
+
+<style>
+.empty-comments {
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: 15px;
+  margin-top: 20px;
+}
+
+.empty-comments i {
+  color: #667eea;
+}
+</style>
+

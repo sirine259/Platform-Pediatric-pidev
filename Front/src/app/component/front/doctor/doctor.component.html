@@ -1,0 +1,81 @@
+<div class="doctor-container">
+  <!-- Header Section -->
+  <div class="doctor-header">
+    <div class="welcome-section">
+      <h1 class="welcome-title">
+        <mat-icon>medical_services</mat-icon>
+        Espace Médecin
+      </h1>
+      <p class="welcome-subtitle">Bienvenue, Dr. {{ currentUser.name }}</p>
+    </div>
+    
+    <div class="quick-actions">
+      <button mat-raised-button color="primary" (click)="viewAppointments()">
+        <mat-icon>calendar_today</mat-icon>
+        Mes Rendez-vous
+      </button>
+      <button mat-raised-button color="accent" (click)="viewPatients()">
+        <mat-icon>people</mat-icon>
+        Mes Patients
+      </button>
+      <button mat-raised-button color="warn" (click)="viewSchedule()">
+        <mat-icon>schedule</mat-icon>
+        Mon Emploi du Temps
+      </button>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  <div class="content-section">
+    <h2 class="section-title">
+      <mat-icon>groups</mat-icon>
+      Annuaire des Médecins
+    </h2>
+
+    <div *ngIf="isLoading" class="loading-spinner">
+      <mat-icon class="spin">refresh</mat-icon>
+      <p>Chargement des médecins...</p>
+    </div>
+
+    <div *ngIf="!isLoading" class="doctors-grid">
+      <div *ngFor="let doctor of doctors" class="doctor-card">
+        <div class="card-header">
+          <mat-icon class="doctor-icon" [class.available]="doctor.available">
+            {{ doctor.available ? 'check_circle' : 'schedule' }}
+          </mat-icon>
+          <div class="doctor-info">
+            <h3>{{ doctor.name }}</h3>
+            <p class="specialty">{{ doctor.specialty }}</p>
+            <span class="availability" [class.available]="doctor.available">
+              {{ doctor.available ? 'Disponible' : 'Indisponible' }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="card-body">
+          <div class="info-row">
+            <mat-icon class="info-icon">email</mat-icon>
+            <span>{{ doctor.email }}</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button mat-button color="primary" (click)="viewDoctorProfile(doctor)">
+            <mat-icon>person</mat-icon>
+            Voir Profil
+          </button>
+          <button mat-button color="accent" (click)="contactDoctor(doctor)">
+            <mat-icon>message</mat-icon>
+            Contacter
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading && doctors.length === 0" class="empty-state">
+      <mat-icon class="empty-icon">medical_services</mat-icon>
+      <h3>Aucun médecin trouvé</h3>
+      <p>L'annuaire des médecins est actuellement vide</p>
+    </div>
+  </div>
+</div>

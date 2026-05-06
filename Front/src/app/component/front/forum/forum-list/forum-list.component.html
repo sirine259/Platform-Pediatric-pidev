@@ -1,0 +1,870 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="header-section">
+        <h2 class="page-title">
+          <mat-icon>forum</mat-icon>
+          Forums de Discussion Pédiatrique
+        </h2>
+        <div class="header-actions">
+          <button mat-raised-button 
+                  color="primary" 
+                  class="add-btn"
+                  (click)="createForum()">
+            <mat-icon>add</mat-icon>
+            Nouveau Forum
+          </button>
+          <button mat-button 
+                  color="accent" 
+                  class="post-btn"
+                  (click)="createPost()">
+            <mat-icon>create</mat-icon>
+            Nouveau Post
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row filters-row">
+    <div class="col-md-6">
+      <mat-form-field appearance="outline" class="w-100 search-field">
+        <mat-label>Rechercher un forum</mat-label>
+        <input matInput 
+               [(ngModel)]="searchTerm" 
+               placeholder="Tapez pour rechercher...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+    <div class="col-md-3">
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Catégorie</mat-label>
+        <mat-select [(ngModel)]="selectedCategory">
+          <mat-option *ngFor="let category of categories" 
+                       [value]="category.value">
+            {{ category.label }}
+          </mat-option>
+        </mat-select>
+        <mat-icon matSuffix>category</mat-icon>
+      </mat-form-field>
+    </div>
+    <div class="col-md-3">
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Trier par</mat-label>
+        <mat-select [(ngModel)]="sortOrder">
+          <mat-option *ngFor="let option of sortOptions" 
+                       [value]="option.value">
+            <mat-icon>{{ option.icon }}</mat-icon>
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+        <mat-icon matSuffix>sort</mat-icon>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="row" *ngIf="showAdvancedSearch">
+    <div class="col-12">
+      <div class="advanced-search-panel">
+        <div class="search-columns-section">
+          <label class="section-label">Colonnes de recherche:</label>
+          <mat-chip-listbox multiple class="column-chips">
+            <mat-chip-option *ngFor="let col of columnOptions"
+                      [selected]="isColumnSelected(col.value)"
+                      (click)="toggleColumn(col.value)"
+                      [class.selected-chip]="isColumnSelected(col.value)">
+              <mat-icon *ngIf="isColumnSelected(col.value)">check</mat-icon>
+              {{ col.label }}
+            </mat-chip-option>
+          </mat-chip-listbox>
+        </div>
+        
+        <div class="date-range-section">
+          <label class="section-label">Période:</label>
+          <div class="date-inputs">
+            <mat-form-field appearance="outline">
+              <mat-label>Du</mat-label>
+              <input matInput [matDatepicker]="pickerFrom" [(ngModel)]="dateFrom">
+              <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFrom></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Au</mat-label>
+              <input matInput [matDatepicker]="pickerTo" [(ngModel)]="dateTo">
+              <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+              <mat-datepicker #pickerTo></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+        
+        <button mat-button color="warn" (click)="clearFilters()" class="clear-btn">
+          <mat-icon>clear_all</mat-icon>
+          Réinitialiser les filtres
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <button mat-button color="primary" (click)="toggleAdvancedSearch()" class="advanced-toggle-btn">
+        <mat-icon>{{ showAdvancedSearch ? 'expand_less' : 'expand_more' }}</mat-icon>
+        {{ showAdvancedSearch ? 'Masquer' : 'Afficher' }} recherche avancée
+        <span class="filter-count" *ngIf="searchColumns.length > 3 || dateFrom || dateTo">
+          ({{ (searchColumns.length > 3 ? searchColumns.length : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0) }})
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div *ngIf="isLoading" class="loading-container">
+        <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+        <p>Chargement des forums...</p>
+      </div>
+
+      <div *ngIf="!isLoading && getFilteredForums().length === 0" class="empty-state">
+        <mat-icon class="empty-icon">forum</mat-icon>
+        <h3>Aucun forum trouvé</h3>
+        <p *ngIf="searchTerm || selectedCategory">
+          Essayez de modifier vos critères de recherche.
+        </p>
+        <p *ngIf="!searchTerm && !selectedCategory">
+          Commencez par créer un nouveau forum de discussion.
+        </p>
+        <button mat-raised-button 
+                color="primary" 
+                (click)="createForum()">
+          <mat-icon>add</mat-icon>
+          Créer un forum
+        </button>
+      </div>
+
+      <div *ngIf="!isLoading && getFilteredForums().length > 0" class="forums-grid">
+        <mat-card class="forum-card" 
+                  *ngFor="let forum of getFilteredForums() | slice:(pageIndex*pageSize):((pageIndex+1)*pageSize)" 
+                  [class.disabled-card]="useServerPagination && forums.indexOf(forum) >= pageSize"
+                  (click)="viewForum(forum.id)">
+          <mat-card-header>
+            <div class="forum-header-content">
+              <div class="forum-icon-wrapper">
+                <mat-icon class="forum-icon">forum</mat-icon>
+              </div>
+              <div class="forum-title-section">
+                <mat-card-title class="card-title">
+                  {{ forum.title }}
+                </mat-card-title>
+                <mat-card-subtitle class="forum-author">
+                  <mat-icon>person</mat-icon>
+                  Par {{ forum.author }}
+                </mat-card-subtitle>
+              </div>
+            </div>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <div class="forum-badges">
+              <span class="badge private" *ngIf="forum.isPrivate">
+                <mat-icon>lock</mat-icon>
+                Privé
+              </span>
+              <span class="badge moderated" *ngIf="forum.requireModeration">
+                <mat-icon>verified</mat-icon>
+                Modéré
+              </span>
+              <span class="badge anonymous" *ngIf="forum.allowAnonymous">
+                <mat-icon>person_off</mat-icon>
+                Anonyme
+              </span>
+            </div>
+            
+            <p class="forum-description">
+              {{ forum.description }}
+            </p>
+            
+            <div class="forum-category">
+              <mat-icon>label</mat-icon>
+              {{ getCategoryLabel(forum.category) }}
+            </div>
+            
+            <div class="forum-stats">
+              <div class="stat-item">
+                <mat-icon class="stat-icon">question_answer</mat-icon>
+                <span class="stat-value">{{ forum.postsCount }} posts</span>
+              </div>
+              <div class="stat-item">
+                <mat-icon class="stat-icon">schedule</mat-icon>
+                <span class="stat-value">{{ forum.createdAt | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+          
+          <mat-card-actions class="card-actions">
+            <button mat-button color="primary" class="action-btn">
+              <mat-icon>visibility</mat-icon>
+              Voir le forum
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+
+      <div class="pagination-container" *ngIf="getFilteredForums().length > 0">
+        <div class="pagination-info">
+          <span>Affichage de {{ (pageIndex * pageSize) + 1 }} - {{ Math.min((pageIndex + 1) * pageSize, getFilteredForums().length) }} sur {{ getFilteredForums().length }} forums</span>
+          <span class="page-indicator">
+            Page {{ pageIndex + 1 }} sur {{ getTotalPages() }}
+          </span>
+        </div>
+        
+        <div class="pagination-controls">
+          <button mat-icon-button 
+                  [disabled]="pageIndex === 0"
+                  (click)="firstPage()"
+                  title="Première page">
+            <mat-icon>first_page</mat-icon>
+          </button>
+          
+          <button mat-icon-button 
+                  [disabled]="pageIndex === 0"
+                  (click)="previousPage()"
+                  title="Page précédente">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          
+          <div class="page-numbers">
+            <button *ngFor="let page of getPageNumbers()"
+                    mat-icon-button
+                    [class.active-page]="page === pageIndex"
+                    (click)="goToPage(page)">
+              {{ page + 1 }}
+            </button>
+          </div>
+          
+          <button mat-icon-button 
+                  [disabled]="pageIndex >= getTotalPages() - 1"
+                  (click)="nextPage()"
+                  title="Page suivante">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+          
+          <button mat-icon-button 
+                  [disabled]="pageIndex >= getTotalPages() - 1"
+                  (click)="lastPage()"
+                  title="Dernière page">
+            <mat-icon>last_page</mat-icon>
+          </button>
+        </div>
+        
+        <mat-form-field appearance="outline" class="page-size-select">
+          <mat-label>Par page</mat-label>
+          <mat-select [(ngModel)]="pageSize" (selectionChange)="onPageChange({pageIndex: 0, pageSize: pageSize, length: totalElements})">
+            <mat-option *ngFor="let size of pageSizeOptions" [value]="size">
+              {{ size }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 30px;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 35px;
+  padding: 30px 35px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  color: white;
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.header-section::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+  animation: float 20s linear infinite;
+}
+
+@keyframes float {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.page-title mat-icon {
+  margin-right: 15px;
+  font-size: 2.5rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.header-actions {
+  display: flex;
+  gap: 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.advanced-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.advanced-toggle-btn:hover {
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.filter-count {
+  background: #667eea;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+.advanced-search-panel {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  padding: 25px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  align-items: flex-start;
+}
+
+.search-columns-section {
+  flex: 1;
+  min-width: 200px;
+}
+
+.date-range-section {
+  flex: 1;
+  min-width: 200px;
+}
+
+.section-label {
+  display: block;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.column-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.column-chips mat-chip {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.column-chips mat-chip:hover {
+  background: rgba(102, 126, 234, 0.2);
+}
+
+.selected-chip {
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  color: white !important;
+}
+
+.date-inputs {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.date-inputs mat-form-field {
+  flex: 1;
+  min-width: 140px;
+}
+
+.clear-btn {
+  align-self: flex-end;
+}
+
+.add-btn, .post-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 25px;
+  border-radius: 25px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.filters-row {
+  margin-bottom: 25px;
+}
+
+.search-field {
+  transition: all 0.3s ease;
+}
+
+.search-field:hover {
+  transform: translateY(-2px);
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.loading-container mat-progress-spinner {
+  margin-bottom: 20px;
+  transform: scale(1.2);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: #666;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.empty-icon {
+  font-size: 5rem;
+  height: 5rem;
+  width: 5rem;
+  color: #667eea;
+  margin-bottom: 25px;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.empty-state p {
+  color: #6c757d;
+  margin-bottom: 25px;
+}
+
+.forums-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 25px;
+}
+
+.forum-card {
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.forum-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: linear-gradient(180deg, #667eea, #764ba2);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.forum-card:hover::before {
+  transform: scaleY(1);
+}
+
+.forum-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.25);
+}
+
+.forum-header-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.forum-icon-wrapper {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.35);
+  transition: transform 0.3s ease;
+}
+
+.forum-card:hover .forum-icon-wrapper {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.forum-icon {
+  font-size: 35px;
+  color: white;
+}
+
+.forum-title-section {
+  flex: 1;
+}
+
+.card-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.forum-author {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.forum-author mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #667eea;
+}
+
+.forum-badges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.badge mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.badge.private {
+  background: linear-gradient(135deg, #ffebee, #ffcdd2);
+  color: #c62828;
+  box-shadow: 0 3px 10px rgba(198, 40, 40, 0.2);
+}
+
+.badge.moderated {
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  color: #2e7d32;
+  box-shadow: 0 3px 10px rgba(46, 125, 50, 0.2);
+}
+
+.badge.anonymous {
+  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+  color: #e65100;
+  box-shadow: 0 3px 10px rgba(230, 81, 0, 0.2);
+}
+
+.forum-description {
+  color: #495057;
+  line-height: 1.7;
+  margin-bottom: 20px;
+  font-size: 15px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.forum-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #667eea;
+  margin-bottom: 20px;
+}
+
+.forum-category mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.forum-stats {
+  display: flex;
+  gap: 25px;
+  padding: 15px;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: 12px;
+  margin-top: 15px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-icon {
+  color: #667eea;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.stat-value {
+  color: #6c757d;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.card-actions {
+  padding: 20px;
+  border-top: 1px solid #f0f4ff;
+}
+
+.action-btn {
+  width: 100%;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 12px;
+  padding: 12px 20px;
+  transition: all 0.3s ease;
+}
+
+.action-btn mat-icon {
+  margin-right: 8px;
+}
+
+.action-btn:hover {
+  background: linear-gradient(135deg, #5568d3, #6a40a8);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.forum-card {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.forum-card:nth-child(1) { animation-delay: 0.1s; }
+.forum-card:nth-child(2) { animation-delay: 0.2s; }
+.forum-card:nth-child(3) { animation-delay: 0.3s; }
+.forum-card:nth-child(4) { animation-delay: 0.4s; }
+.forum-card:nth-child(5) { animation-delay: 0.5s; }
+.forum-card:nth-child(6) { animation-delay: 0.6s; }
+
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+  
+  .header-section {
+    flex-direction: column;
+    gap: 20px;
+    padding: 25px;
+    text-align: center;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+    flex-direction: column;
+  }
+  
+  .page-title mat-icon {
+    margin-right: 0;
+    margin-bottom: 10px;
+    font-size: 2rem;
+  }
+  
+  .header-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .forums-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .forum-stats {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .forum-badges {
+    margin-top: 10px;
+  }
+  
+  .forum-icon-wrapper {
+    width: 55px;
+    height: 55px;
+  }
+  
+  .forum-icon {
+    font-size: 28px;
+  }
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 30px 20px;
+  margin-top: 30px;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  color: #6c757d;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.page-indicator {
+  font-weight: 700;
+  color: #667eea;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-controls button {
+  transition: all 0.3s ease;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  background: rgba(102, 126, 234, 0.1);
+  transform: scale(1.1);
+}
+
+.pagination-controls button:disabled {
+  opacity: 0.4;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 5px;
+}
+
+.page-numbers button {
+  min-width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.active-page {
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.page-size-select {
+  width: 120px;
+}
+
+.page-size-select mat-select {
+  font-weight: 600;
+}
+
+.disabled-card {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .pagination-container {
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+  }
+  
+  .pagination-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .page-numbers {
+    order: -1;
+    margin-bottom: 10px;
+  }
+}
+</style>

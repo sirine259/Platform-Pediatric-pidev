@@ -1,0 +1,170 @@
+<div class="signup-container">
+  <div class="signup-card">
+    <!-- Header Section -->
+    <div class="auth-header">
+      <div class="header-content">
+        <div class="logo-section">
+          <mat-icon class="main-logo">medical_services</mat-icon>
+          <h1 class="app-title">Plateforme Pédiatrique</h1>
+        </div>
+        <div class="header-text">
+          <h2 class="auth-title">Inscription</h2>
+          <p class="auth-subtitle">Créez votre compte pour accéder aux services</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <form class="auth-form" [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+      <div class="form-section">
+        <h3 class="section-title">
+          <mat-icon>person_add</mat-icon>
+          Informations Personnelles
+        </h3>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Prénom</mat-label>
+            <input matInput 
+                   type="text" 
+                   formControlName="firstName" 
+                   placeholder="Entrez votre prénom"
+                   required>
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-error *ngIf="firstName?.invalid && (firstName?.dirty || firstName?.touched)">
+              <span *ngIf="firstName?.errors?.['required']">Le prénom est requis</span>
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Nom</mat-label>
+            <input matInput 
+                   type="text" 
+                   formControlName="lastName" 
+                   placeholder="Entrez votre nom"
+                   required>
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-error *ngIf="lastName?.invalid && (lastName?.dirty || lastName?.touched)">
+              <span *ngIf="lastName?.errors?.['required']">Le nom est requis</span>
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nom d'utilisateur</mat-label>
+            <input matInput 
+                   type="text" 
+                   formControlName="username" 
+                   placeholder="Choisissez un nom d'utilisateur"
+                   required>
+            <mat-icon matSuffix>account_circle</mat-icon>
+            <mat-error *ngIf="username?.invalid && (username?.dirty || username?.touched)">
+              <span *ngIf="username?.errors?.['required']">Le nom d'utilisateur est requis</span>
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
+            <input matInput 
+                   type="email" 
+                   formControlName="email" 
+                   placeholder="Entrez votre adresse email"
+                   required>
+            <mat-icon matSuffix>email</mat-icon>
+            <mat-error *ngIf="email?.invalid && (email?.dirty || email?.touched)">
+              <span *ngIf="email?.errors?.['required']">L'email est requis</span>
+              <span *ngIf="email?.errors?.['email']">Veuillez entrer un email valide</span>
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Mot de passe</mat-label>
+            <input matInput 
+                   type="password" 
+                   formControlName="password" 
+                   placeholder="Entrez votre mot de passe"
+                   required>
+            <mat-icon matSuffix>lock</mat-icon>
+            <mat-error *ngIf="password?.invalid && (password?.dirty || password?.touched)">
+              <span *ngIf="password?.errors?.['required']">Le mot de passe est requis</span>
+              <span *ngIf="password?.errors?.['minlength']">Le mot de passe doit contenir au moins 6 caractères</span>
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Confirmer le mot de passe</mat-label>
+            <input matInput 
+                   type="password" 
+                   formControlName="confirmPassword" 
+                   placeholder="Confirmez votre mot de passe"
+                   required>
+            <mat-icon matSuffix>lock</mat-icon>
+            <mat-error *ngIf="confirmPassword?.invalid && (confirmPassword?.dirty || confirmPassword?.touched)">
+              <span *ngIf="confirmPassword?.errors?.['required']">La confirmation du mot de passe est requise</span>
+            </mat-error>
+            <mat-error *ngIf="signupForm.errors?.['mismatch']">
+              Les mots de passe ne correspondent pas
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Rôle</mat-label>
+            <mat-select formControlName="role">
+              <mat-option value="PATIENT">Patient</mat-option>
+              <mat-option value="DOCTOR">Médecin</mat-option>
+              <mat-option value="NURSE">Infirmier</mat-option>
+              <mat-option value="ADMIN">Administrateur</mat-option>
+            </mat-select>
+            <mat-icon matSuffix>assignment_ind</mat-icon>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div *ngIf="successMessage" class="success-message">
+        <mat-icon>check_circle</mat-icon>
+        {{ successMessage }}
+      </div>
+
+      <div *ngIf="errorMessage" class="error-message">
+        <mat-icon>error</mat-icon>
+        {{ errorMessage }}
+      </div>
+
+      <!-- Submit Button -->
+      <div class="form-actions">
+        <button mat-raised-button 
+                color="primary" 
+                type="submit"
+                [disabled]="signupForm.invalid || isLoading"
+                class="submit-button">
+          <span *ngIf="!isLoading" class="button-content">
+            <mat-icon>person_add</mat-icon>
+            Créer un compte
+          </span>
+          <span *ngIf="isLoading" class="button-content">
+            <mat-icon class="spinner">refresh</mat-icon>
+            Création en cours...
+          </span>
+        </button>
+      </div>
+    </form>
+
+    <!-- Footer Section -->
+    <div class="auth-footer">
+      <div class="auth-links">
+        <button mat-button (click)="goToLogin()" class="link-button">
+          <mat-icon>login</mat-icon>
+          Déjà un compte? Se connecter
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

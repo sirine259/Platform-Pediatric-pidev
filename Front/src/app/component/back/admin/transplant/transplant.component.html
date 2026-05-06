@@ -1,0 +1,171 @@
+<div class="transplant-container">
+  <div class="transplant-header">
+    <h1 class="transplant-title">Gestion des Transplantations</h1>
+    <button mat-raised-button class="add-transplant-btn" (click)="addTransplant()">
+      <mat-icon>add</mat-icon>
+      Nouvelle Transplantation
+    </button>
+  </div>
+
+  <div class="stats-grid">
+    <mat-card class="stat-card">
+      <h3>Total Transplantations</h3>
+      <div class="stat-value">{{ transplants.length }}</div>
+      <div class="stat-label">Procédures enregistrées</div>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <h3>Donateurs Disponibles</h3>
+      <div class="stat-value">{{ availableDonorsCount }}</div>
+      <div class="stat-label">Prêts pour transplantation</div>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <h3>Patients en Attente</h3>
+      <div class="stat-value">{{ waitingRecipientsCount }}</div>
+      <div class="stat-label">Urgence élevée</div>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <h3>Procédures Actives</h3>
+      <div class="stat-value">{{ activeTransplantsCount }}</div>
+      <div class="stat-label">En cours</div>
+    </mat-card>
+  </div>
+
+  <div class="filter-section">
+    <div class="filter-form">
+      <mat-form-field class="filter-field">
+        <mat-label>Rechercher</mat-label>
+        <input matInput [(ngModel)]="searchTerm" (keyup)="applyFilter()" placeholder="Patient, médecin...">
+      </mat-form-field>
+      
+      <mat-form-field class="filter-field">
+        <mat-label>Statut</mat-label>
+        <mat-select>
+          <mat-option value="">Tous</mat-option>
+          <mat-option value="planned">Planifié</mat-option>
+          <mat-option value="in-progress">En cours</mat-option>
+          <mat-option value="completed">Terminé</mat-option>
+          <mat-option value="cancelled">Annulé</mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <mat-form-field class="filter-field">
+        <mat-label>Type</mat-label>
+        <mat-select>
+          <mat-option value="">Tous</mat-option>
+          <mat-option value="Rein">Rein</mat-option>
+          <mat-option value="Foie">Foie</mat-option>
+          <mat-option value="Cœur">Cœur</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="transplant-table">
+    <div class="table-header">
+      <h2 class="table-title">Liste des Transplantations</h2>
+    </div>
+    
+    <div *ngIf="isLoading" class="loading-spinner">
+      <mat-spinner></mat-spinner>
+    </div>
+    
+    <div *ngIf="!isLoading && transplants.length === 0" class="empty-state">
+      <mat-icon>medical_services</mat-icon>
+      <p>Aucune transplantation enregistrée</p>
+    </div>
+    
+    <table mat-table *ngIf="!isLoading && transplants.length > 0" [dataSource]="transplants">
+      <!-- ID Column -->
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef>ID</th>
+        <td mat-cell *matCellDef="let transplant">{{ transplant.id }}</td>
+      </ng-container>
+
+      <!-- Patient Column -->
+      <ng-container matColumnDef="patient">
+        <th mat-header-cell *matHeaderCellDef>Patient</th>
+        <td mat-cell *matCellDef="let transplant">
+          <strong>{{ transplant.patient }}</strong>
+        </td>
+      </ng-container>
+
+      <!-- Doctor Column -->
+      <ng-container matColumnDef="doctor">
+        <th mat-header-cell *matHeaderCellDef>Médecin</th>
+        <td mat-cell *matCellDef="let transplant">{{ transplant.doctor }}</td>
+      </ng-container>
+
+      <!-- Date Column -->
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>Date</th>
+        <td mat-cell *matCellDef="let transplant">{{ transplant.date | date:'dd/MM/yyyy' }}</td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Statut</th>
+        <td mat-cell *matCellDef="let transplant">
+          <span [class]="getStatusClass(transplant.status)">
+            {{ transplant.status === 'completed' ? 'Terminé' : 
+               transplant.status === 'planned' ? 'Planifié' :
+               transplant.status === 'in-progress' ? 'En cours' : 'Annulé' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Type Column -->
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let transplant">{{ transplant.type }}</td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let transplant">
+          <div class="action-buttons">
+            <button mat-icon-button class="action-btn view" (click)="viewDetails(transplant.id)" matTooltip="Voir détails">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button mat-icon-button class="action-btn edit" (click)="editTransplant(transplant.id)" matTooltip="Modifier">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button class="action-btn" (click)="updateStatus(transplant)" matTooltip="Changer statut">
+              <mat-icon>sync</mat-icon>
+            </button>
+            <button mat-icon-button class="action-btn delete" (click)="deleteTransplant(transplant.id)" matTooltip="Supprimer">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
+  <!-- Quick Actions Section -->
+  <div class="stats-grid" style="margin-top: 32px;">
+    <mat-card class="stat-card" style="cursor: pointer;" (click)="viewDonor(1)">
+      <h3>Gestion Donneurs</h3>
+      <div class="stat-value">{{ donors.length }}</div>
+      <div class="stat-label">Donateurs enregistrés</div>
+    </mat-card>
+    
+    <mat-card class="stat-card" style="cursor: pointer;" (click)="viewRecipient(1)">
+      <h3>Gestion Receveurs</h3>
+      <div class="stat-value">{{ recipients.length }}</div>
+      <div class="stat-label">Patients en liste</div>
+    </mat-card>
+    
+    <mat-card class="stat-card" style="cursor: pointer;" (click)="addTransplant()">
+      <h3>Nouvelle Procédure</h3>
+      <div class="stat-value">+</div>
+      <div class="stat-label">Ajouter transplantation</div>
+    </mat-card>
+  </div>
+</div>

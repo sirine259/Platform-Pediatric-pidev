@@ -1,0 +1,282 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="header-section">
+        <h2 class="page-title">
+          <mat-icon>medical_services</mat-icon>
+          Transplantations Rénales Pédiatriques
+        </h2>
+        <button mat-raised-button 
+                color="primary" 
+                class="add-btn"
+                (click)="createTransplant()">
+          <mat-icon>add</mat-icon>
+          Nouvelle Transplantation
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div *ngIf="isLoading" class="loading-container">
+        <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+        <p>Chargement des transplantations...</p>
+      </div>
+
+      <div *ngIf="!isLoading && transplants.length === 0" class="empty-state">
+        <mat-icon class="empty-icon">inbox</mat-icon>
+        <h3>Aucune transplantation enregistrée</h3>
+        <p>Commencez par ajouter une nouvelle transplantation rénale.</p>
+        <button mat-raised-button 
+                color="primary" 
+                (click)="createTransplant()">
+          <mat-icon>add</mat-icon>
+          Ajouter une transplantation
+        </button>
+      </div>
+
+      <div *ngIf="!isLoading && transplants.length > 0" class="transplants-grid">
+        <mat-card class="transplant-card" *ngFor="let transplant of transplants">
+          <mat-card-header>
+            <mat-card-title class="card-title">
+              {{ transplant.patientName }}
+            </mat-card-title>
+            <mat-card-subtitle>
+              {{ transplant.patientAge }} ans • {{ transplant.diagnosis }}
+            </mat-card-subtitle>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <div class="transplant-info">
+              <div class="info-row">
+                <mat-icon class="info-icon">event</mat-icon>
+                <span class="info-label">Date:</span>
+                <span class="info-value">{{ transplant.transplantDate | date:'dd/MM/yyyy' }}</span>
+              </div>
+              
+              <div class="info-row">
+                <mat-icon class="info-icon">person</mat-icon>
+                <span class="info-label">Donneur:</span>
+                <span class="info-value">{{ transplant.donorType }}</span>
+              </div>
+              
+              <div class="info-row">
+                <mat-icon class="info-icon">local_hospital</mat-icon>
+                <span class="info-label">Hôpital:</span>
+                <span class="info-value">{{ transplant.hospital }}</span>
+              </div>
+              
+              <div class="info-row">
+                <mat-icon class="info-icon">medical_services</mat-icon>
+                <span class="info-label">Chirurgien:</span>
+                <span class="info-value">{{ transplant.surgeon }}</span>
+              </div>
+              
+              <div class="info-row">
+                <mat-icon class="info-icon">circle</mat-icon>
+                <span class="info-label">Statut:</span>
+                <span class="info-value status-badge" [ngClass]="getStatusClass(transplant.status)">
+                  {{ transplant.status }}
+                </span>
+              </div>
+              
+              <div class="info-row">
+                <mat-icon class="info-icon">schedule</mat-icon>
+                <span class="info-label">Post-transplant:</span>
+                <span class="info-value">{{ getAgeInYears(transplant.transplantDate) }} an(s)</span>
+              </div>
+            </div>
+          </mat-card-content>
+          
+          <mat-card-actions class="card-actions">
+            <button mat-button 
+                    color="primary" 
+                    (click)="viewTransplant(transplant.id)">
+              <mat-icon>visibility</mat-icon>
+              Voir détails
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <app-google-maps [height]="'450px'" [zoom]="6"></app-google-maps>
+    </div>
+  </div>
+</div>
+
+<style>
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: white;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.page-title mat-icon {
+  margin-right: 12px;
+  font-size: 2rem;
+}
+
+.add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.loading-container mat-progress-spinner {
+  margin-bottom: 20px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  height: 4rem;
+  width: 4rem;
+  color: #ccc;
+  margin-bottom: 20px;
+}
+
+.transplants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 20px;
+}
+
+.transplant-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.transplant-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.transplant-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-icon {
+  color: #667eea;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.info-label {
+  font-weight: 500;
+  color: #666;
+  min-width: 80px;
+}
+
+.info-value {
+  color: #333;
+  flex: 1;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-active {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+
+.status-followup {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.status-pending {
+  background-color: #fce4ec;
+  color: #c2185b;
+}
+
+.status-default {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.card-actions {
+  padding: 16px;
+  border-top: 1px solid #eee;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-section {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .transplants-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-row {
+    flex-wrap: wrap;
+  }
+  
+  .info-label {
+    min-width: auto;
+    margin-right: 8px;
+  }
+}
+</style>

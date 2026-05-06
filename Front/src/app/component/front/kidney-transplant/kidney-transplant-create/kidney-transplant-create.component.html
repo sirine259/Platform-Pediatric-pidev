@@ -1,0 +1,411 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <mat-card class="transplant-card">
+        <mat-card-header class="card-header">
+          <mat-card-title class="card-title">
+            <mat-icon class="title-icon">medical_services</mat-icon>
+            Nouvelle Kidney Transplantation Pédiatrique
+          </mat-card-title>
+          <mat-card-subtitle>
+            Formulaire de création de transplantation rénale pédiatrique
+          </mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <form [formGroup]="transplantForm" (ngSubmit)="onSubmit()" class="transplant-form">
+            
+            <!-- Section Informations Patient -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <mat-icon>person</mat-icon>
+                Informations Patient
+              </h3>
+              
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Nom Complet du Patient</mat-label>
+                    <input matInput formControlName="patientName" 
+                           placeholder="Entrez le nom complet du patient">
+                    <mat-icon matSuffix>person</mat-icon>
+                    <mat-error *ngIf="patientName?.hasError('required')">
+                      Le nom du patient est requis
+                    </mat-error>
+                    <mat-error *ngIf="patientName?.hasError('minlength')">
+                      Le nom doit contenir au moins 2 caractères
+                    </mat-error>
+                    <mat-error *ngIf="patientName?.hasError('maxlength')">
+                      Le nom ne peut pas dépasser 50 caractères
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+                
+                <div class="col-md-3">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Âge (années)</mat-label>
+                    <input matInput type="number" formControlName="patientAge" 
+                           placeholder="Âge en années (0-18)">
+                    <mat-icon matSuffix>cake</mat-icon>
+                    <mat-error *ngIf="patientAge?.hasError('required')">
+                      L'âge est requis
+                    </mat-error>
+                    <mat-error *ngIf="patientAge?.hasError('min')">
+                      L'âge doit être positif
+                    </mat-error>
+                    <mat-error *ngIf="patientAge?.hasError('max')">
+                      L'âge ne peut pas dépasser 18 ans (pédiatrique)
+                    </mat-error>
+                    <mat-error *ngIf="patientAge?.hasError('pattern')">
+                      Veuillez entrer un nombre valide
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+                
+                <div class="col-md-3">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Groupe Sanguin</mat-label>
+                    <mat-select formControlName="bloodType">
+                      <mat-option value="A+">A+</mat-option>
+                      <mat-option value="A-">A-</mat-option>
+                      <mat-option value="B+">B+</mat-option>
+                      <mat-option value="B-">B-</mat-option>
+                      <mat-option value="AB+">AB+</mat-option>
+                      <mat-option value="AB-">AB-</mat-option>
+                      <mat-option value="O+">O+</mat-option>
+                      <mat-option value="O-">O-</mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix>bloodtype</mat-icon>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section Informations Médicales -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <mat-icon>medical_information</mat-icon>
+                Informations Médicales
+              </h3>
+              
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Diagnostic Principal</mat-label>
+                    <mat-select formControlName="diagnosis">
+                      <mat-option value="">Sélectionnez un diagnostic</mat-option>
+                      <mat-option *ngFor="let option of diagnosisOptions" 
+                                   [value]="option.value">
+                        {{ option.label }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix>healing</mat-icon>
+                    <mat-error *ngIf="diagnosis?.hasError('required')">
+                      Le diagnostic est requis
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+                
+                <div class="col-md-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Date de Transplantation</mat-label>
+                    <input matInput [matDatepicker]="picker" formControlName="transplantDate">
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                    <mat-icon matSuffix>event</mat-icon>
+                    <mat-error *ngIf="transplantDate?.hasError('required')">
+                      La date de transplantation est requise
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+              
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Type de Donneur</mat-label>
+                    <mat-select formControlName="donorType">
+                      <mat-option value="">Sélectionnez le type</mat-option>
+                      <mat-option *ngFor="let option of donorTypeOptions" 
+                                   [value]="option.value">
+                        {{ option.label }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix>favorite</mat-icon>
+                    <mat-error *ngIf="donorType?.hasError('required')">
+                      Le type de donneur est requis
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+                
+                <div class="col-md-4">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Compatibilité HLA</mat-label>
+                    <input matInput formControlName="hlaMatch" 
+                           placeholder="Ex: 6/6, 5/6, 4/6">
+                    <mat-icon matSuffix>biotech</mat-icon>
+                  </mat-form-field>
+                </div>
+                
+                <div class="col-md-4">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Thérapie Immunosuppressive</mat-label>
+                    <mat-select formControlName="immunosuppressiveTherapy">
+                      <mat-option value="Standard">Standard</mat-option>
+                      <mat-option value="Renforcée">Renforcée</mat-option>
+                      <mat-option value="Minimale">Minimale</mat-option>
+                      <mat-option value="Personnalisée">Personnalisée</mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix>medication</mat-icon>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section Hospitalisation -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <mat-icon>local_hospital</mat-icon>
+                Détails Hospitalisation
+              </h3>
+              
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Établissement Hospitalier</mat-label>
+                    <mat-select formControlName="hospital">
+                      <mat-option value="">Sélectionnez l'hôpital</mat-option>
+                      <mat-option *ngFor="let option of hospitalOptions" 
+                                   [value]="option.value">
+                        {{ option.label }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix>location_city</mat-icon>
+                    <mat-error *ngIf="hospital?.hasError('required')">
+                      L'hôpital est requis
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+                
+                <div class="col-md-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Chirurgien Principal</mat-label>
+                    <input matInput formControlName="surgeon" 
+                           placeholder="Nom du chirurgien">
+                    <mat-icon matSuffix>person_pin</mat-icon>
+                    <mat-error *ngIf="surgeon?.hasError('required')">
+                      Le nom du chirurgien est requis
+                    </mat-error>
+                    <mat-error *ngIf="surgeon?.hasError('minlength')">
+                      Le nom doit contenir au moins 2 caractères
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+              
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Calendrier de Suivi</mat-label>
+                    <mat-select formControlName="followUpSchedule">
+                      <mat-option value="">Sélectionnez le calendrier</mat-option>
+                      <mat-option value="hebdomadaire">Hebdomadaire (premier mois)</mat-option>
+                      <mat-option value="mensuel">Mensuel (6 mois)</mat-option>
+                      <mat-option value="trimestriel">Trimestriel (1 an)</mat-option>
+                      <mat-option value="semestriel">Semestriel (2 ans)</mat-option>
+                      <mat-option value="annuel">Annuel (au-delà)</mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix>calendar_month</mat-icon>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section Notes -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <mat-icon>notes</mat-icon>
+                Notes Additionnelles
+              </h3>
+              
+              <div class="row mb-3">
+                <div class="col-12">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Notes Médicales et Observations</mat-label>
+                    <textarea matInput formControlName="notes" 
+                              rows="4" 
+                              placeholder="Notes importantes, complications, observations particulières..."></textarea>
+                    <mat-icon matSuffix>description</mat-icon>
+                    <mat-hint align="end">{{ notes?.value?.length || 0 }}/500 caractères</mat-hint>
+                    <mat-error *ngIf="notes?.hasError('maxlength')">
+                      Les notes ne peuvent pas dépasser 500 caractères
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+              <div class="row">
+                <div class="col-12">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="left-actions">
+                      <button mat-button type="button" 
+                              (click)="resetForm()"
+                              [disabled]="isSubmitting">
+                        <mat-icon>refresh</mat-icon>
+                        Réinitialiser
+                      </button>
+                    </div>
+                    
+                    <div class="right-actions">
+                      <button mat-button type="button" 
+                              (click)="cancel()"
+                              [disabled]="isSubmitting">
+                        <mat-icon>close</mat-icon>
+                        Annuler
+                      </button>
+                      
+                      <button mat-raised-button 
+                              color="primary" 
+                              type="submit" 
+                              [disabled]="transplantForm.invalid || isSubmitting">
+                        <mat-icon *ngIf="!isSubmitting">save</mat-icon>
+                        <mat-icon *ngIf="isSubmitting" class="spin">refresh</mat-icon>
+                        {{ isSubmitting ? 'Enregistrement en cours...' : 'Créer la Kidney Transplantation' }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
+
+<!-- Styles additionnels -->
+<style>
+.transplant-card {
+  max-width: 100%;
+  margin: 0 auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 24px;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.title-icon {
+  margin-right: 12px;
+  font-size: 2rem;
+}
+
+.transplant-form {
+  padding: 24px;
+}
+
+.form-section {
+  margin-bottom: 32px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  border-left: 4px solid #667eea;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.section-title mat-icon {
+  margin-right: 8px;
+  color: #667eea;
+}
+
+.form-actions {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.left-actions, .right-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.mat-mdc-form-field-flex {
+  background-color: white;
+  border-radius: 8px;
+}
+
+.mat-mdc-form-field-appearance-outline .mdc-text-field--outlined {
+  background-color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .transplant-card {
+    margin: 16px;
+  }
+  
+  .transplant-form {
+    padding: 16px;
+  }
+  
+  .form-section {
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .form-actions .d-flex {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .right-actions {
+    justify-content: center;
+  }
+}
+
+/* Material Design overrides */
+.mat-mdc-raised-button {
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 8px 24px;
+}
+
+.mat-mdc-outlined-button {
+  border-radius: 8px;
+  padding: 8px 16px;
+}
+</style>

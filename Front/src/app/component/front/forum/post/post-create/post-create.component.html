@@ -1,0 +1,151 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <div class="create-header">
+        <h2 class="create-title">
+          <i class="fas fa-pen-nib"></i>
+          Créer un Nouveau Post
+        </h2>
+      </div>
+      
+      <div class="create-form">
+        <form [formGroup]="postForm" (ngSubmit)="onSubmit()">
+          
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-file-alt"></i>
+              Contenu du Post
+            </h3>
+            
+            <div class="form-group">
+              <label class="required-field">Titre du Post</label>
+              <input type="text" 
+                     class="form-control" 
+                     formControlName="title"
+                     placeholder="Entrez un titre clair et descriptif pour votre post">
+              <div class="char-count" [class.warning]="title?.value?.length > 80" [class.danger]="title?.value?.length > 95">
+                {{ title?.value?.length || 0 }}/100 caractères
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="required-field">Contenu du Post</label>
+              <textarea class="form-control" 
+                        formControlName="content"
+                        rows="8"
+                        placeholder="Décrivez votre expérience, posez une question ou partagez un conseil avec la communauté..."></textarea>
+              <div class="char-count" [class.warning]="content?.value?.length > 1800" [class.danger]="content?.value?.length > 1950">
+                {{ content?.value?.length || 0 }}/2000 caractères
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-video"></i>
+              Médias (Optionnel)
+            </h3>
+            
+            <div class="form-group">
+              <label>Lien vidéo (YouTube, Vimeo, mp4)</label>
+              <input type="url" 
+                     class="form-control" 
+                     formControlName="videoUrl"
+                     placeholder="Collez l'URL de votre vidéo ici">
+            </div>
+            
+            <div class="form-group">
+              <label>Uploader une vidéo</label>
+              <div class="image-upload">
+                <input type="file"
+                       class="form-control"
+                       accept="video/*"
+                       (change)="onVideoFileSelected($event)">
+              </div>
+              <small class="form-text">
+                <i class="fas fa-info-circle"></i> Taille maximale: 10MB
+              </small>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-cog"></i>
+              Paramètres du Post
+            </h3>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="required-field">Type de Post</label>
+                  <select class="form-control" formControlName="postType">
+                    <option value="">Sélectionnez un type</option>
+                    <option *ngFor="let option of postTypes" [value]="option.value">
+                      {{ option.label }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="required-field">Forum</label>
+                  <select class="form-control" formControlName="forumId">
+                    <option value="1">Transplantations Rénales</option>
+                    <option value="2">Dialyse Pédiatrique</option>
+                    <option value="3">Expériences Parents</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <div class="form-check">
+                <input type="checkbox" 
+                       class="form-check-input" 
+                       formControlName="isAnonymous"
+                       id="anonymousCheck">
+                <label class="form-check-label" for="anonymousCheck">
+                  <i class="fas fa-user-secret"></i>
+                  Publier anonymement
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" 
+                    class="btn btn-outline-secondary"
+                    (click)="resetForm()"
+                    [disabled]="isSubmitting">
+              <i class="fas fa-undo"></i>
+              Réinitialiser
+            </button>
+            
+            <button type="button" 
+                    class="btn btn-outline-secondary"
+                    (click)="cancel()"
+                    [disabled]="isSubmitting">
+              <i class="fas fa-times"></i>
+              Annuler
+            </button>
+            
+            <button type="submit" 
+                    class="btn btn-primary"
+                    [disabled]="postForm.invalid || isSubmitting">
+              <span *ngIf="!isSubmitting">
+                <i class="fas fa-paper-plane"></i>
+                Publier le Post
+              </span>
+              <span *ngIf="isSubmitting">
+                <i class="fas fa-spinner fa-spin"></i>
+                Publication en cours...
+              </span>
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,161 @@
+<div class="transplant-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="sr-only">Chargement...</span>
+    </div>
+    <p class="mt-2">Chargement des détails de la transplantation...</p>
+  </div>
+
+  <!-- Transplant Details -->
+  <div *ngIf="!isLoading && transplant" class="transplant-details">
+    <!-- Header -->
+    <div class="row mb-5">
+      <div class="col-12">
+        <div class="detail-header">
+          <div class="header-content">
+            <h2 class="detail-title">
+              <i class="fas fa-kidney"></i> 
+              Transplantation Rénale de {{ transplant.patientName }}
+            </h2>
+            <p class="patient-subtitle">
+              <span class="badge bg-primary">Âge: {{ transplant.patientAge }} ans</span>
+              <span class="badge bg-info ms-2">{{ transplant.bloodType }}</span>
+            </p>
+          </div>
+          <div class="detail-actions">
+            <button class="btn btn-primary" (click)="createFollowUp()">
+              <i class="fas fa-plus"></i> Ajouter un Suivi
+            </button>
+            <button class="btn btn-outline-secondary" (click)="goBack()">
+              <i class="fas fa-arrow-left"></i> Retour
+            </button>
+          </div>
+        </div>
+        <hr class="my-4">
+      </div>
+    </div>
+
+    <!-- Patient Info -->
+    <div class="row">
+      <div class="col-md-6">
+        <div class="patient-info">
+          <h4>Informations Patient</h4>
+          <div class="info-card">
+            <div class="patient-avatar">
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="patient-details">
+              <p><strong>Nom:</strong> {{ transplant.patientName }}</p>
+              <p><strong>Âge:</strong> {{ transplant.patientAge || 'N/A' }}</p>
+              <p><strong>Groupe Sanguin:</strong> {{ transplant.bloodType || 'N/A' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="transplant-info">
+          <h4>Informations Kidney Transplantation</h4>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Date:</label>
+              <span>{{ formatDate(transplant.transplantDate) }}</span>
+            </div>
+            <div class="info-item">
+              <label>Donneur:</label>
+              <span>{{ transplant.donorName }}</span>
+            </div>
+            <div class="info-item">
+              <label>Type:</label>
+              <span>{{ transplant.donorType || 'N/A' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Statut:</label>
+              <span class="badge" [ngClass]="'bg-' + getStatusColor(transplant.status)">
+                {{ getStatusLabel(transplant.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Medical Records -->
+    <div class="row mt-5">
+      <div class="col-12">
+        <div class="medical-records section-card">
+          <h4 class="section-title">
+            <i class="fas fa-file-medical"></i> Dossiers Médicaux
+          </h4>
+          <hr class="section-divider">
+          <div class="records-list">
+            <div *ngFor="let record of medicalRecords; let last = last" class="record-item">
+              <div class="record-header">
+                <span class="record-type" [ngClass]="'bg-' + getRecordTypeColor(record.type)">
+                  {{ getRecordTypeLabel(record.type) }}
+                </span>
+                <span class="record-date">
+                  <i class="fas fa-calendar-alt"></i> {{ formatDate(record.date) }}
+                </span>
+              </div>
+              <div class="record-content">
+                <p><strong>Médecin:</strong> {{ record.doctor }}</p>
+                <p><strong>Notes:</strong> {{ record.notes }}</p>
+              </div>
+              <hr *ngIf="!last" class="record-divider">
+            </div>
+            <div *ngIf="medicalRecords.length === 0" class="no-records">
+              <i class="fas fa-file-medical"></i>
+              <p>Aucun dossier médical enregistré</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Follow-ups -->
+    <div class="row mt-5">
+      <div class="col-12">
+        <div class="follow-ups section-card">
+          <h4 class="section-title">
+            <i class="fas fa-stethoscope"></i> Suivis Post-Transplantation
+          </h4>
+          <hr class="section-divider">
+          <div class="follow-ups-list">
+            <div *ngFor="let followUp of followUps; let last = last" class="follow-up-item">
+              <div class="follow-up-header">
+                <span class="follow-up-type" [ngClass]="'bg-' + getFollowUpTypeColor(followUp.type)">
+                  {{ getFollowUpTypeLabel(followUp.type) }}
+                </span>
+                <span class="follow-up-date">
+                  <i class="fas fa-calendar-alt"></i> {{ formatDate(followUp.date) }}
+                </span>
+              </div>
+              <div class="follow-up-content">
+                <p><strong>Médecin:</strong> {{ followUp.doctor }}</p>
+                <p><strong>Créatinine:</strong> {{ followUp.creatinineLevel }} mg/dL</p>
+                <p><strong>TFG:</strong> {{ followUp.gfr }} mL/min</p>
+                <p><strong>Tension:</strong> {{ followUp.bloodPressure }}</p>
+                <p><strong>Notes:</strong> {{ followUp.notes }}</p>
+              </div>
+              <div class="follow-up-actions">
+                <button class="btn btn-sm btn-primary" (click)="updateFollowUp(followUp.id)" title="Modifier">
+                  <i class="fas fa-edit"></i> Modifier
+                </button>
+                <button class="btn btn-sm btn-danger" (click)="deleteFollowUp(followUp.id)" title="Supprimer">
+                  <i class="fas fa-trash"></i> Supprimer
+                </button>
+              </div>
+              <hr *ngIf="!last" class="follow-up-divider">
+            </div>
+            <div *ngIf="followUps.length === 0" class="no-follow-ups">
+              <i class="fas fa-stethoscope"></i>
+              <p>Aucun suivi post-transplantation enregistré</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,88 @@
+<div class="parent-container">
+  <!-- Header Section -->
+  <div class="parent-header">
+    <div class="welcome-section">
+      <h1 class="welcome-title">
+        <mat-icon>family_restroom</mat-icon>
+        Espace Parent
+      </h1>
+      <p class="welcome-subtitle">Bienvenue, {{ currentUser.name }}</p>
+      <div class="parent-info">
+        <span class="info-badge">Enfants: {{ currentUser.childrenCount }}</span>
+      </div>
+    </div>
+    
+    <div class="quick-actions">
+      <button mat-raised-button color="primary" (click)="viewAppointments()">
+        <mat-icon>calendar_today</mat-icon>
+        Rendez-vous
+      </button>
+      <button mat-raised-button color="accent" (click)="viewSchoolInfo()">
+        <mat-icon>school</mat-icon>
+        École
+      </button>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  <div class="content-section">
+    <div class="section-grid">
+      <!-- Children -->
+      <div class="section-card">
+        <h2 class="section-title">
+          <mat-icon>child_care</mat-icon>
+          Mes Enfants
+        </h2>
+
+        <div *ngIf="isLoading" class="loading-spinner">
+          <mat-icon class="spin">refresh</mat-icon>
+          <p>Chargement des enfants...</p>
+        </div>
+
+        <div *ngIf="!isLoading" class="children-list">
+          <div *ngFor="let child of children" class="child-item">
+            <div class="child-info">
+              <h4>{{ child.name }}</h4>
+              <p>Âge: {{ child.age }} ans | Classe: {{ child.class }}</p>
+              <span class="school-info">{{ child.school }}</span>
+            </div>
+            <div class="child-actions">
+              <button mat-button color="primary" (click)="viewChild(child)">
+                <mat-icon>visibility</mat-icon>
+                Voir Profil
+              </button>
+              <button mat-button color="accent" (click)="viewMedicalRecords(child)">
+                <mat-icon>medical_services</mat-icon>
+                Dossier Médical
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="section-card">
+        <h2 class="section-title">
+          <mat-icon>notifications</mat-icon>
+          Notifications
+        </h2>
+
+        <div class="notifications-list">
+          <div *ngFor="let notification of notifications" class="notification-item">
+            <div class="notification-info">
+              <h4>{{ notification.type }}</h4>
+              <p>{{ notification.message }}</p>
+              <span class="notification-date">{{ notification.date }}</span>
+            </div>
+            <div class="notification-actions">
+              <button mat-button color="primary" (click)="markNotificationAsRead(notification)">
+                <mat-icon>{{ notification.read ? 'mark_as_unread' : 'mark_as_read' }}</mat-icon>
+                {{ notification.read ? 'Marquer comme non lu' : 'Marquer comme lu' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

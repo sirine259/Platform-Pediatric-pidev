@@ -1,0 +1,130 @@
+﻿{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "panels": [
+    {
+      "title": "Forum - Requtes HTTP/s",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "id": 1,
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "targets": [{"expr": "rate(http_server_requests_seconds_count{application=\"kidneytransplant-forum-service\"}[1m])"}]
+    },
+    {
+      "title": "Forum - Latence (ms)",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "id": 2,
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "targets": [{"expr": "rate(http_server_requests_seconds_sum{application=\"kidneytransplant-forum-service\"}[1m]) / rate(http_server_requests_seconds_count{application=\"kidneytransplant-forum-service\"}[1m]) * 1000"}]
+    },
+    {
+      "title": "Forum - Erreurs 5xx",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "id": 3,
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "targets": [{"expr": "rate(http_server_requests_seconds_count{application=\"kidneytransplant-forum-service\", status=~\"5..\"}[1m])"}]
+    },
+    {
+      "title": "Forum - JVM Memory (MB)",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "id": 4,
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+      "targets": [{"expr": "jvm_memory_used_bytes{application=\"kidneytransplant-forum-service\", area=\"heap\"} / 1048576"}]
+    },
+    {
+      "title": "KidneyTransplant - Requtes HTTP/s",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "id": 5,
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 4},
+      "targets": [{"expr": "rate(http_server_requests_seconds_count{application=\"kidneytransplant-service\"}[1m])"}]
+    },
+    {
+      "title": "KidneyTransplant - Latence (ms)",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "id": 6,
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 4},
+      "targets": [{"expr": "rate(http_server_requests_seconds_sum{application=\"kidneytransplant-service\"}[1m]) / rate(http_server_requests_seconds_count{application=\"kidneytransplant-service\"}[1m]) * 1000"}]
+    },
+    {
+      "title": "KidneyTransplant - Erreurs 5xx",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "id": 7,
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 4},
+      "targets": [{"expr": "rate(http_server_requests_seconds_count{application=\"kidneytransplant-service\", status=~\"5..\"}[1m])"}]
+    },
+    {
+      "title": "KidneyTransplant - JVM Memory (MB)",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "id": 8,
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 4},
+      "targets": [{"expr": "jvm_memory_used_bytes{application=\"kidneytransplant-service\", area=\"heap\"} / 1048576"}]
+    },
+    {
+      "title": "Forum - Requetes par Endpoint",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "id": 9,
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "targets": [{"expr": "rate(http_server_requests_seconds_count{application=\"kidneytransplant-forum-service\"}[1m])", "legendFormat": "{{method}} {{uri}} - {{status}}"}]
+    },
+    {
+      "title": "KidneyTransplant - Requetes par Endpoint",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "id": 10,
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "targets": [{"expr": "rate(http_server_requests_seconds_count{application=\"kidneytransplant-service\"}[1m])", "legendFormat": "{{method}} {{uri}} - {{status}}"}]
+    },
+    {
+      "title": "Forum - Threads Actifs",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "id": 11,
+      "gridPos": {"h": 8, "w": 6, "x": 0, "y": 16},
+      "targets": [{"expr": "jvm_threads_live_threads{application=\"kidneytransplant-forum-service\"}"}]
+    },
+    {
+      "title": "KidneyTransplant - Threads Actifs",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "id": 12,
+      "gridPos": {"h": 8, "w": 6, "x": 6, "y": 16},
+      "targets": [{"expr": "jvm_threads_live_threads{application=\"kidneytransplant-service\"}"}]
+    },
+    {
+      "title": "Forum - GC Count",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "id": 13,
+      "gridPos": {"h": 8, "w": 6, "x": 12, "y": 16},
+      "targets": [{"expr": "rate(jvm_gc_pause_seconds_count{application=\"kidneytransplant-forum-service\"}[1m])"}]
+    },
+    {
+      "title": "KidneyTransplant - GC Count",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "id": 14,
+      "gridPos": {"h": 8, "w": 6, "x": 18, "y": 16},
+      "targets": [{"expr": "rate(jvm_gc_pause_seconds_count{application=\"kidneytransplant-service\"}[1m])"}]
+    }
+  ],
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["pediatric", "forum", "kidneytransplant"],
+  "templating": {"list": []},
+  "time": {"from": "now-1h", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Pediatric Platform - Forum & KidneyTransplant",
+  "uid": "pediatric-modules-dashboard",
+  "version": 1
+}

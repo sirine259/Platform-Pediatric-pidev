@@ -1,0 +1,81 @@
+<div class="chatbot-container">
+  <button class="chatbot-toggle" (click)="toggleChat()" [class.open]="isOpen">
+    <span class="chat-icon" *ngIf="!isOpen">💬</span>
+    <span class="close-icon" *ngIf="isOpen">✕</span>
+    <span class="notification-badge" *ngIf="!isOpen && messages.length === 0">1</span>
+  </button>
+
+  <div class="chatbot-window" *ngIf="isOpen">
+    <div class="chatbot-header">
+      <div class="header-content">
+        <span class="bot-avatar">🤖</span>
+        <div class="header-text">
+          <h3>NephroBot</h3>
+          <span class="status">En ligne - Néphrologie Pédiatrique</span>
+        </div>
+      </div>
+      <button class="clear-btn" (click)="clearChat()" title="Effacer le chat">🗑️</button>
+    </div>
+
+    <div class="chatbot-messages" #messagesContainer>
+      <div class="welcome-section" *ngIf="messages.length === 0">
+        <p>Bienvenue ! Je suis <strong>NephroBot</strong>, votre assistant en néphrologie pédiatrique.</p>
+        <p>Je peux vous aider avec :</p>
+        <ul>
+          <li>Questions sur les maladies rénales</li>
+          <li>Informations sur la dialyse</li>
+          <li>Transplantation rénale</li>
+          <li>Nutrition adaptée</li>
+        </ul>
+        <p class="disclaimer">⚠️ Je ne remplace pas un avis médical professionnel.</p>
+      </div>
+
+      <div class="quick-questions" *ngIf="messages.length <= 2">
+        <p class="quick-label">Questions fréquentes :</p>
+        <div class="quick-buttons">
+          <button *ngFor="let q of quickQuestions" 
+                  class="quick-btn" 
+                  (click)="askQuickQuestion(q)">
+            {{ q }}
+          </button>
+        </div>
+      </div>
+
+      <div *ngFor="let msg of messages; let i = index" 
+           class="message" 
+           [class.user]="msg.role === 'user'"
+           [class.bot]="msg.role === 'assistant'">
+        <div class="message-avatar">
+          {{ msg.role === 'user' ? '👤' : '🤖' }}
+        </div>
+        <div class="message-content">
+          <p>{{ msg.content }}</p>
+          <span class="message-time" *ngIf="msg.timestamp">{{ formatTime(msg.timestamp) }}</span>
+        </div>
+      </div>
+
+      <div class="message bot typing" *ngIf="isTyping">
+        <div class="message-avatar">🤖</div>
+        <div class="message-content">
+          <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chatbot-input">
+      <input type="text" 
+             [(ngModel)]="userMessage" 
+             (keyup.enter)="sendMessage()"
+             placeholder="Posez votre question..."
+             [disabled]="isLoading">
+      <button (click)="sendMessage()" [disabled]="!userMessage.trim() || isLoading">
+        <span *ngIf="!isLoading">Envoyer</span>
+        <span *ngIf="isLoading" class="spinner">⏳</span>
+      </button>
+    </div>
+  </div>
+</div>
