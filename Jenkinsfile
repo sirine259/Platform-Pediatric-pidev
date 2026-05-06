@@ -6,6 +6,10 @@ pipeline {
     nodejs "NodeJS20"
   }
 
+  triggers {
+    githubPush()
+  }
+
   environment {
     DOCKER_USER = "sirine215"
     TAG         = "${BUILD_NUMBER}"
@@ -27,12 +31,28 @@ pipeline {
       }
     }
 
+    stage("Test KidneyTransplant") {
+      steps {
+        dir("Back") {
+          sh "mvn test -Dtest=*KidneyTransplant*,*PostTransplantFollowUp* -DfailIfNoTests=false"
+        }
+      }
+    }
+
+    stage("Test Forum") {
+      steps {
+        dir("Back") {
+          sh "mvn test -Dtest=ForumServiceTest,PostServiceTest -DfailIfNoTests=false"
+        }
+      }
+    }
+
     stage("Build Frontend") {
       steps {
         dir("Front") {
           sh """
             if [ -d node_modules ]; then
-              echo "node_modules existe deja, skip install"
+              echo "node_modules existe, skip install"
             else
               npm install --legacy-peer-deps
             fi
@@ -46,7 +66,7 @@ pipeline {
       steps {
         withSonarQubeEnv("SonarQube") {
           dir("Back") {
-            sh "mvn sonar:sonar -Dsonar.projectKey=forum-kidney"
+            sh "mvn sonar:sonar -Dsonar.projectKey=pediatric-kidneytransplant-kidneytransplant"
           }
         }
       }
