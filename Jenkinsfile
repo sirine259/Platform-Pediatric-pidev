@@ -3,14 +3,11 @@ pipeline {
 
   tools {
     maven "Maven3"
-    nodejs "NodeJS20"   // ✅ correction ici
+    nodejs "NodeJS20"   // ✅ important pour npm
   }
 
   environment {
-    DOCKERHUB_USER = "sirine215"
-    IMAGE_FORUM = "${DOCKERHUB_USER}/forum-service"
-    IMAGE_KIDNEY = "${DOCKERHUB_USER}/kidneytransplant-service"
-    IMAGE_FRONTEND = "${DOCKERHUB_USER}/pediatric-frontend"
+    DOCKER_USER = "sirine215"
     TAG = "${BUILD_NUMBER}"
   }
 
@@ -22,25 +19,16 @@ pipeline {
       }
     }
 
-    // 🔵 BUILD FORUM
-    stage("Build Forum") {
+    // 🔵 BACKEND (forum + kidney ensemble)
+    stage("Build Backend") {
       steps {
-        dir("Back/forum-service") {
-          bat "mvn clean install -DskipTests=true"
+        dir("Back") {
+          bat "mvn clean install -DskipTests"
         }
       }
     }
 
-    // 🔵 BUILD KIDNEY
-    stage("Build Kidney") {
-      steps {
-        dir("Back/kidneytransplant-service") {
-          bat "mvn clean install -DskipTests=true"
-        }
-      }
-    }
-
-    // 🟢 BUILD FRONTEND
+    // 🟢 FRONTEND
     stage("Build Frontend") {
       steps {
         dir("Front") {
@@ -50,45 +38,39 @@ pipeline {
       }
     }
 
-    // 🔍 SONAR FORUM
-    stage("Sonar Forum") {
+    // 🔍 SONAR (backend uniquement)
+    stage("SonarQube") {
       steps {
-        withSonarQubeEnv('SonarQube') {
-          dir("Back/forum-service") {
-            bat "mvn sonar:sonar -Dsonar.projectKey=forum"
+        withSonarQubeEnv('SonarQube') {   // ⚠️ nom serveur pas credentials
+          dir("Back") {
+            bat "mvn sonar:sonar -Dsonar.projectKey=forum-kidney"
           }
         }
       }
     }
 
-    // 🔍 SONAR KIDNEY
-    stage("Sonar Kidney") {
+    // 🐳 DOCKER
+    stage("Docker Build & Push") {
       steps {
-        withSonarQubeEnv('SonarQube') {
-          dir("Back/kidneytransplant-service") {
-            bat "mvn sonar:sonar -Dsonar.projectKey=kidney"
-          }
+        withCredentials([usernamePassword(credentialsId: "sirine215", usernameVariable: "U", passwordVariable: "P")]) {
+          bat """
+            docker build -t %DOCKER_USER%/forum-kidney-back:%TAG% Back/
+            docker build -t %DOCKER_USER%/frontend:%TAG% Front/
+            
+            echo %P% | docker login -u %U% --password-stdin
+            
+            docker push %DOCKER_USER%/forum-kidney-back:%TAG%
+            docker push %DOCKER_USER%/frontend:%TAG%
+          """
         }
       }
     }
 
-    // 🐳 DOCKER BUILD
-    stage("Docker Build") {
+    // ☸️ DEPLOY
+    stage("Deploy Kubernetes") {
       steps {
-        bat "docker build -t ${IMAGE_FORUM}:${TAG} Back/forum-service"
-        bat "docker build -t ${IMAGE_KIDNEY}:${TAG} Back/kidneytransplant-service"
-        bat "docker build -t ${IMAGE_FRONTEND}:${TAG} Front"
-      }
-    }
-
-    // 🐳 PUSH DOCKER
-    stage("Docker Push") {
-      steps {
-        withCredentials([usernamePassword(credentialsId: "sirine215", usernameVariable: "USER", passwordVariable: "PASS")]) {
-          bat "echo %PASS% | docker login -u %USER% --password-stdin"
-          bat "docker push ${IMAGE_FORUM}:${TAG}"
-          bat "docker push ${IMAGE_KIDNEY}:${TAG}"
-          bat "docker push ${IMAGE_FRONTEND}:${TAG}"
+        withCredentials([file(credentialsId: "pediatric medical", variable: "K8S")]) {
+          bat "kubectl --kubeconfig=%K8S% apply -f k8s/"
         }
       }
     }
@@ -97,10 +79,13 @@ pipeline {
 
   post {
     success {
-      echo "Pipeline OK ✅ Version ${TAG}"
+      echo "Pipeline SUCCESS ✅"
     }
     failure {
       echo "Pipeline FAILED ❌"
+    }
+    always {
+      echo "Done ✔"
     }
   }
 }
