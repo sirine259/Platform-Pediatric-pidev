@@ -30,8 +30,14 @@ pipeline {
     stage("Build Frontend") {
       steps {
         dir("Front") {
-          sh "npm ci --legacy-peer-deps"
-          sh "npm run build"
+          sh """
+            if [ -d node_modules ]; then
+              echo "node_modules existe deja, skip install"
+            else
+              npm install --legacy-peer-deps
+            fi
+            npm run build
+          """
         }
       }
     }
@@ -67,8 +73,8 @@ pipeline {
     stage("Deploy") {
       steps {
         sh """
-          docker compose down --remove-orphans || true
-          DOCKER_USER=\$DOCKER_USER TAG=\$TAG docker compose up -d
+          docker-compose down --remove-orphans || true
+          DOCKER_USER=\$DOCKER_USER TAG=\$TAG docker-compose up -d
         """
       }
     }
@@ -81,7 +87,7 @@ pipeline {
     }
     failure {
       echo "Pipeline FAILED ❌"
-      sh "docker compose logs --tail=30 || true"
+      sh "docker ps -a || true"
     }
     always {
       echo "Done ✔"
