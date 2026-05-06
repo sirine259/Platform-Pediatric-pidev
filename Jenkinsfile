@@ -3,7 +3,7 @@ pipeline {
 
   tools {
     maven "Maven3"
-    nodejs "NodeJS"
+    nodejs "NodeJS20"   // ✅ correction ici
   }
 
   environment {
@@ -12,7 +12,6 @@ pipeline {
     IMAGE_KIDNEY = "${DOCKERHUB_USER}/kidneytransplant-service"
     IMAGE_FRONTEND = "${DOCKERHUB_USER}/pediatric-frontend"
     TAG = "${BUILD_NUMBER}"
-    NAMESPACE = "pediatric"
   }
 
   stages {
@@ -41,7 +40,7 @@ pipeline {
       }
     }
 
-    // 🟢 BUILD FRONT
+    // 🟢 BUILD FRONTEND
     stage("Build Frontend") {
       steps {
         dir("Front") {
@@ -82,12 +81,11 @@ pipeline {
       }
     }
 
-    // 🐳 PUSH
+    // 🐳 PUSH DOCKER
     stage("Docker Push") {
       steps {
         withCredentials([usernamePassword(credentialsId: "sirine215", usernameVariable: "USER", passwordVariable: "PASS")]) {
           bat "echo %PASS% | docker login -u %USER% --password-stdin"
-
           bat "docker push ${IMAGE_FORUM}:${TAG}"
           bat "docker push ${IMAGE_KIDNEY}:${TAG}"
           bat "docker push ${IMAGE_FRONTEND}:${TAG}"
