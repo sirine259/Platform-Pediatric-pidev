@@ -28,10 +28,6 @@ data:
       - job_name: 'prometheus'
         static_configs:
           - targets: ['localhost:9090']
-
-      - job_name: 'node-exporter'
-        static_configs:
-          - targets: ['node-exporter:9100']
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -53,9 +49,6 @@ spec:
         image: prom/prometheus:v2.51.0
         ports:
         - containerPort: 9090
-        args:
-          - '--config.file=/etc/prometheus/prometheus.yml'
-          - '--storage.tsdb.path=/prometheus'
         volumeMounts:
         - name: config
           mountPath: /etc/prometheus/prometheus.yml
@@ -64,10 +57,10 @@ spec:
           mountPath: /prometheus
         resources:
           requests:
-            memory: "512Mi"
+            memory: "256Mi"
             cpu: "200m"
           limits:
-            memory: "1Gi"
+            memory: "512Mi"
             cpu: "500m"
       volumes:
       - name: config
@@ -87,5 +80,4 @@ spec:
   ports:
   - port: 9090
     targetPort: 9090
-    nodePort: 30090
-  type: NodePort
+  type: ClusterIP

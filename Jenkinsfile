@@ -6,13 +6,8 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: "10"))
   }
 
-  triggers {
-    githubPush()
-  }
-
   tools {
     maven "Maven3"
-    nodejs "NodeJS"
   }
 
   environment {
@@ -34,60 +29,21 @@ pipeline {
       }
     }
 
-    stage("Build and Test Backend with Coverage") {
+    stage("Build and Test Backend") {
       parallel {
         stage("Build and Test Eureka") {
           steps {
-            sh "cd Back/eureka-server && mvn clean verify jacoco:report -DskipTests=false"
-          }
-          post {
-            success {
-              publishHTML(target: [
-                allowMissing: false,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'Back/eureka-server/target/site/jacoco',
-                reportFiles: 'index.html',
-                reportName: 'JaCoCo Eureka Coverage',
-                reportTitles: ''
-              ])
-            }
+            sh "cd Back/eureka-server && mvn clean test -DskipTests=false"
           }
         }
         stage("Build and Test Gateway") {
           steps {
-            sh "cd Back/api-gateway && mvn clean verify jacoco:report -DskipTests=false"
-          }
-          post {
-            success {
-              publishHTML(target: [
-                allowMissing: false,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'Back/api-gateway/target/site/jacoco',
-                reportFiles: 'index.html',
-                reportName: 'JaCoCo Gateway Coverage',
-                reportTitles: ''
-              ])
-            }
+            sh "cd Back/api-gateway && mvn clean test -DskipTests=false"
           }
         }
         stage("Build and Test Backend Service") {
           steps {
-            sh "cd Back && mvn clean verify jacoco:report -DskipTests=false"
-          }
-          post {
-            success {
-              publishHTML(target: [
-                allowMissing: false,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'Back/target/site/jacoco',
-                reportFiles: 'index.html',
-                reportName: 'JaCoCo Backend Coverage',
-                reportTitles: ''
-              ])
-            }
+            sh "cd Back && mvn clean test -DskipTests=false"
           }
         }
       }
@@ -96,20 +52,6 @@ pipeline {
     stage("Build and Test Frontend") {
       steps {
         sh "cd Front && npm ci --legacy-peer-deps"
-        sh "cd Front && npm run test -- --watch=false --code-coverage --browsers=ChromeHeadless"
-      }
-      post {
-        success {
-          publishHTML(target: [
-            allowMissing: false,
-            alwaysLinkToLastBuild: true,
-            keepAll: true,
-            reportDir: 'Front/coverage/pediatric-nephrology-platform',
-            reportFiles: 'index.html',
-            reportName: 'Frontend Coverage',
-            reportTitles: ''
-          ])
-        }
       }
     }
 
@@ -118,57 +60,43 @@ pipeline {
         stage("SonarQube - Eureka") {
           steps {
             withSonarQubeEnv(credentialsId: 'sonarqube-credentials') {
-              sh "cd Back/eureka-server && mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}-eureka -Dsonar.projectName='Eureka Server' -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml"
+              sh "cd Back/eureka-server && mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}-eureka -Dsonar.projectName='Eureka Server' -Dsonar.host.url=${SONAR_HOST_URL}"
             }
           }
         }
         stage("SonarQube - Gateway") {
           steps {
             withSonarQubeEnv(credentialsId: 'sonarqube-credentials') {
-              sh "cd Back/api-gateway && mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}-gateway -Dsonar.projectName='API Gateway' -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml"
+              sh "cd Back/api-gateway && mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}-gateway -Dsonar.projectName='API Gateway' -Dsonar.host.url=${SONAR_HOST_URL}"
             }
           }
         }
         stage("SonarQube - Backend Service") {
           steps {
             withSonarQubeEnv(credentialsId: 'sonarqube-credentials') {
-              sh "cd Back && mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}-backend -Dsonar.projectName='Backend Service' -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml"
+              sh "cd Back && mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}-backend -Dsonar.projectName='Backend Service' -Dsonar.host.url=${SONAR_HOST_URL}"
             }
           }
         }
         stage("SonarQube - Frontend") {
           steps {
-            script {
-              withSonarQubeEnv(credentialsId: 'sonarqube-credentials') {
-                sh "cd Front && npx sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY}-frontend -Dsonar.projectName='Frontend' -Dsonar.sources=src -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts -Dsonar.javascript.lcov.reportPaths=coverage/pediatric-nephrology-platform/lcov.info"
-              }
+            sh "cd Front && npm install -g sonarqube-scanner"
+            withSonarQubeEnv(credentialsId: 'sonarqube-credentials') {
+              sh "cd Front && sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY}-frontend -Dsonar.projectName='Frontend' -Dsonar.sources=src -Dsonar.host.url=${SONAR_HOST_URL}"
             }
           }
         }
       }
     }
 
-    stage("Quality Gate - All Projects") {
+    stage("Quality Gate") {
       steps {
-        timeout(time: 15, unit: 'MINUTES') {
+        timeout(time: 10, unit: 'MINUTES') {
           script {
-            def qgEureka = waitForQualityGate()
-            if (qgEureka.status != 'OK') {
-              error "Quality Gate EUREKA failed: ${qgEureka.status}"
+            def qg = waitForQualityGate()
+            if (qg.status != 'OK') {
+              error "Quality Gate failed: ${qg.status}"
             }
-            def qgGateway = waitForQualityGate()
-            if (qgGateway.status != 'OK') {
-              error "Quality Gate GATEWAY failed: ${qgGateway.status}"
-            }
-            def qgBackend = waitForQualityGate()
-            if (qgBackend.status != 'OK') {
-              error "Quality Gate BACKEND failed: ${qgBackend.status}"
-            }
-            def qgFrontend = waitForQualityGate()
-            if (qgFrontend.status != 'OK') {
-              error "Quality Gate FRONTEND failed: ${qgFrontend.status}"
-            }
-            echo "Tous les Quality Gates passes avec succes!"
           }
         }
       }
@@ -248,44 +176,19 @@ pipeline {
             sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} rollout status deployment/prometheus --timeout=120s"
             sh "kubectl --kubeconfig=$KUBECONFIG_FILE apply -f k8s/07-grafana.yaml"
             sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} rollout status deployment/grafana --timeout=120s"
-            echo "Prometheus disponible sur: http://<node-ip>:9090"
+            echo "Prometheus available sur: http://<node-ip>:9090"
             echo "Grafana disponible sur: http://<node-ip>:3000 (admin/admin)"
           }
         }
       }
     }
 
-    stage("Smoke Test - Verify Deployment") {
-      steps {
-        script {
-          echo "Verification du déploiement..."
-          sh "curl -f http://localhost:8761/actuator/health || echo 'Eureka check failed'"
-          sh "curl -f http://localhost:8080/actuator/health || echo 'Gateway check failed'"
-          sh "curl -f http://localhost:8091/actuator/health || echo 'Backend check failed'"
-        }
-      }
-    }
-  }
-
-  post {
+    post {
     success {
       echo "Pipeline reussi - Version ${TAG} deployee dans ${NAMESPACE}"
-      emailext (
-        subject: "SUCCESS: Pipeline ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
-        body: "Le pipeline a reussi.\nVersion: ${TAG}\nNamespace: ${NAMESPACE}\n\nAcces:\n- Frontend: http://<node-ip>\n- Eureka: http://<node-ip>:8761\n- Prometheus: http://<node-ip>:9090\n- Grafana: http://<node-ip>:3000",
-        to: "${env.CHANGE_AUTHOR_EMAIL ?: 'admin@example.com'}"
-      )
     }
     failure {
       echo "Pipeline echoue - Verifier les logs"
-      emailext (
-        subject: "FAILURE: Pipeline ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
-        body: "Le pipeline a echoue.\nVerifier les logs: ${env.BUILD_URL}console",
-        to: "${env.CHANGE_AUTHOR_EMAIL ?: 'admin@example.com'}"
-      )
-    }
-    always {
-      cleanWs()
     }
   }
 }

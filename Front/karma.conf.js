@@ -11,6 +11,10 @@ module.exports = function(config) {
     ],
     client: {
       jasmine: {
+        supportColor: true,
+        random: true,
+        seed: 42,
+        stopSpecOnExpectationFailure: false
       },
       clearContext: false
     },
@@ -18,12 +22,11 @@ module.exports = function(config) {
       suppressAll: true
     },
     coverageReporter: {
-      dir: require('path').join(__dirname, './coverage/pediatric-nephrology-platform'),
+      dir: require('path').join(__dirname, './coverage/pediatric-platform'),
       subdir: '.',
       reporters: [
         { type: 'html' },
-        { type: 'text-summary' },
-        { type: 'lcov' }
+        { type: 'text-summary' }
       ]
     },
     reporters: ['progress', 'kjhtml'],

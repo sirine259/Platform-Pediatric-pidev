@@ -4,8 +4,8 @@ import com.esprit.platformepediatricback.entity.VoteComment;
 import com.esprit.platformepediatricback.entity.Comment;
 import com.esprit.platformepediatricback.Repository.CommentRepository;
 import com.esprit.platformepediatricback.Service.VoteCommentService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,24 +13,21 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@AllArgsConstructor
+@Slf4j
 @RequestMapping("/api/vote-comment")
 @CrossOrigin(origins = "http://localhost:4200")
 public class VoteCommentController {
 
-    private static final Logger log = LoggerFactory.getLogger(VoteCommentController.class);
-
     private final VoteCommentService voteCommentService;
     private final CommentRepository commentRepository;
 
-    public VoteCommentController(VoteCommentService voteCommentService, CommentRepository commentRepository) {
-        this.voteCommentService = voteCommentService;
-        this.commentRepository = commentRepository;
-    }
-
+    // Voter pour un commentaire (UpVote/DownVote)
     @PutMapping("/{commentId}/vote")
     public ResponseEntity<Void> voteComment(
-            @PathVariable Long commentId,
+            @PathVariable Long commentId, 
             @RequestParam String vote) {
+        
         try {
             VoteComment voteType = VoteComment.valueOf(vote);
             voteCommentService.voteComment(commentId, voteType);
@@ -42,10 +39,12 @@ public class VoteCommentController {
         }
     }
 
+    // Changer le vote d'un commentaire
     @PutMapping("/{commentId}/change-vote")
     public ResponseEntity<Void> changeVote(
-            @PathVariable Long commentId,
+            @PathVariable Long commentId, 
             @RequestParam String newVote) {
+        
         try {
             VoteComment voteType = VoteComment.valueOf(newVote);
             voteCommentService.changeVote(commentId, voteType);
@@ -57,6 +56,7 @@ public class VoteCommentController {
         }
     }
 
+    // Annuler le vote d'un commentaire
     @PutMapping("/{commentId}/remove-vote")
     public ResponseEntity<Void> removeVote(@PathVariable Long commentId) {
         voteCommentService.removeVote(commentId);
@@ -64,18 +64,21 @@ public class VoteCommentController {
         return ResponseEntity.ok().build();
     }
 
+    // Obtenir le vote d'un commentaire
     @GetMapping("/{commentId}/vote")
     public ResponseEntity<VoteComment> getCommentVote(@PathVariable Long commentId) {
         VoteComment vote = voteCommentService.getCommentVote(commentId);
         return ResponseEntity.ok(vote);
     }
 
+    // Obtenir le score d'un commentaire
     @GetMapping("/{commentId}/score")
     public ResponseEntity<Integer> getCommentScore(@PathVariable Long commentId) {
         int score = voteCommentService.getCommentScore(commentId);
         return ResponseEntity.ok(score);
     }
 
+    // Compter les votes par type
     @GetMapping("/count/{voteType}")
     public ResponseEntity<Long> countVotesByType(@PathVariable String voteType) {
         try {
@@ -88,6 +91,7 @@ public class VoteCommentController {
         }
     }
 
+    // Obtenir tous les commentaires votés avec un type spécifique
     @GetMapping("/type/{voteType}")
     public ResponseEntity<List<Comment>> getCommentsByVote(@PathVariable String voteType) {
         try {
@@ -100,28 +104,40 @@ public class VoteCommentController {
         }
     }
 
+    // Obtenir les statistiques de votes
     @GetMapping("/statistics")
     public ResponseEntity<Map<VoteComment, Long>> getVoteStatistics() {
         Map<VoteComment, Long> stats = voteCommentService.getVoteStatistics();
         return ResponseEntity.ok(stats);
     }
 
+    // Obtenir les commentaires les mieux votés
     @GetMapping("/top-voted")
     public ResponseEntity<List<Comment>> getTopVotedComments() {
         List<Comment> comments = voteCommentService.getTopVotedComments();
         return ResponseEntity.ok(comments);
     }
 
+    // Obtenir les statistiques détaillées
     @GetMapping("/detailed-statistics")
     public ResponseEntity<Map<String, Object>> getDetailedStatistics() {
         Map<String, Object> stats = new java.util.HashMap<>();
+        
+        // Statistiques de base
         Map<VoteComment, Long> voteStats = voteCommentService.getVoteStatistics();
         stats.put("voteStatistics", voteStats);
+        
+        // Totaux
         long totalVotes = voteStats.values().stream().mapToLong(Long::longValue).sum();
         stats.put("totalVotes", totalVotes);
+        
+        // Scores nets
         long upVotes = voteStats.getOrDefault(VoteComment.UpVote, 0L);
         long downVotes = voteStats.getOrDefault(VoteComment.DownVote, 0L);
-        stats.put("netScore", upVotes - downVotes);
+        long netScore = upVotes - downVotes;
+        stats.put("netScore", netScore);
+        
+        // Pourcentages
         if (totalVotes > 0) {
             stats.put("upVotePercentage", (upVotes * 100.0) / totalVotes);
             stats.put("downVotePercentage", (downVotes * 100.0) / totalVotes);
@@ -129,6 +145,7 @@ public class VoteCommentController {
             stats.put("upVotePercentage", 0.0);
             stats.put("downVotePercentage", 0.0);
         }
+        
         return ResponseEntity.ok(stats);
     }
 }
