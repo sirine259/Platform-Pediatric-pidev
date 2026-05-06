@@ -8,7 +8,7 @@ pipeline {
 
   environment {
     DOCKER_USER = "sirine215"
-    TAG = "${BUILD_NUMBER}"
+    TAG         = "${BUILD_NUMBER}"
   }
 
   stages {
@@ -30,7 +30,7 @@ pipeline {
     stage("Build Frontend") {
       steps {
         dir("Front") {
-          sh "npm install --legacy-peer-deps"
+          sh "npm ci --legacy-peer-deps"
           sh "npm run build"
         }
       }
@@ -38,7 +38,7 @@ pipeline {
 
     stage("SonarQube") {
       steps {
-        withSonarQubeEnv('SonarQube') {
+        withSonarQubeEnv("SonarQube") {
           dir("Back") {
             sh "mvn sonar:sonar -Dsonar.projectKey=forum-kidney"
           }
@@ -48,35 +48,31 @@ pipeline {
 
     stage("Docker Build & Push") {
       steps {
-        withCredentials([
-          usernamePassword(
-            credentialsId: "sirine215",
-            usernameVariable: "U",
-            passwordVariable: "P"
-          )
-        ]) {
-          sh '''
-            docker build -t $DOCKER_USER/forum-kidney-back:$TAG Back/
-            docker build -t $DOCKER_USER/frontend:$TAG Front/
-
-            echo $P | docker login -u $U --password-stdin
-
-            docker push $DOCKER_USER/forum-kidney-back:$TAG
-            docker push $DOCKER_USER/frontend:$TAG
-          '''
+        withCredentials([usernamePassword(
+          credentialsId: "sirine215",
+          usernameVariable: "U",
+          passwordVariable: "P"
+        )]) {
+          sh """
+            echo \$P | docker login -u \$U --password-stdin
+            docker build -t \$DOCKER_USER/forum-kidney-back:\$TAG Back/
+            docker build -t \$DOCKER_USER/frontend:\$TAG Front/
+            docker push \$DOCKER_USER/forum-kidney-back:\$TAG
+            docker push \$DOCKER_USER/frontend:\$TAG
+          """
         }
       }
     }
 
-    stage("Deploy Kubernetes") {
+    stage("Deploy") {
       steps {
-        withCredentials([
-          file(credentialsId: "pediatric medical", variable: "K8S")
-        ]) {
-          sh "kubectl --kubeconfig=$K8S apply -f k8s/"
-        }
+        sh """
+          docker compose down --remove-orphans || true
+          DOCKER_USER=\$DOCKER_USER TAG=\$TAG docker compose up -d
+        """
       }
     }
+
   }
 
   post {
@@ -85,6 +81,7 @@ pipeline {
     }
     failure {
       echo "Pipeline FAILED ❌"
+      sh "docker compose logs --tail=30 || true"
     }
     always {
       echo "Done ✔"
