@@ -168,7 +168,7 @@ pipeline {
       }
     }
 
-    stage("Deploy Monitoring (Prometheus + Grafana)") {
+       stage("Deploy Monitoring (Prometheus + Grafana)") {
       steps {
         withCredentials([file(credentialsId: "pediatric medical", variable: "KUBECONFIG_FILE")]) {
           script {
@@ -176,14 +176,16 @@ pipeline {
             sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} rollout status deployment/prometheus --timeout=120s"
             sh "kubectl --kubeconfig=$KUBECONFIG_FILE apply -f k8s/07-grafana.yaml"
             sh "kubectl --kubeconfig=$KUBECONFIG_FILE -n ${NAMESPACE} rollout status deployment/grafana --timeout=120s"
-            echo "Prometheus available sur: http://<node-ip>:9090"
+            echo "Prometheus disponible sur: http://<node-ip>:9090"
             echo "Grafana disponible sur: http://<node-ip>:3000 (admin/admin)"
           }
         }
       }
     }
 
-    post {
+  } 
+
+  post {
     success {
       echo "Pipeline reussi - Version ${TAG} deployee dans ${NAMESPACE}"
     }
@@ -191,6 +193,5 @@ pipeline {
       echo "Pipeline echoue - Verifier les logs"
     }
   }
-}
 
-
+} 
