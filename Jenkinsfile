@@ -34,15 +34,7 @@ pipeline {
     stage("Build Frontend") {
       steps {
         dir("Front") {
-          sh """
-            if [ -d node_modules ]; then
-              echo "node_modules existe, skip install"
-            else
-              npm install --legacy-peer-deps
-            fi
-            npm install -g @angular/cli --legacy-peer-deps
-            ng build
-          """
+          sh "npx ng build --configuration=production || npx ng build"
         }
       }
     }
@@ -51,7 +43,7 @@ pipeline {
       steps {
         withSonarQubeEnv("SonarQube") {
           dir("Back") {
-            sh "mvn sonar:sonar -Dsonar.projectKey=pediatric-kidneytransplant-kidneytransplant -DskipTests"
+            sh "mvn sonar:sonar -Dsonar.projectKey=pediatric-platform -DskipTests"
           }
         }
       }
@@ -89,9 +81,7 @@ pipeline {
   post {
     success {
       echo "Pipeline SUCCESS ✅"
-      echo "Webhook GitHub → Jenkins fonctionne ✅"
-      echo "Backend  build ✅"
-      echo "Frontend build ✅"
+      echo "Webhook GitHub → Jenkins ✅"
     }
     failure {
       echo "Pipeline FAILED ❌"
