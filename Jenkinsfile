@@ -40,7 +40,8 @@ pipeline {
             else
               npm install --legacy-peer-deps
             fi
-            npm run build
+            npm install -g @angular/cli --legacy-peer-deps
+            ng build
           """
         }
       }
@@ -88,6 +89,9 @@ pipeline {
   post {
     success {
       echo "Pipeline SUCCESS ✅"
+      echo "Webhook GitHub → Jenkins fonctionne ✅"
+      echo "Backend  build ✅"
+      echo "Frontend build ✅"
     }
     failure {
       echo "Pipeline FAILED ❌"
