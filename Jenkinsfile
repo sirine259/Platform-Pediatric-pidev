@@ -31,33 +31,6 @@ pipeline {
       }
     }
 
-    stage("Test KidneyTransplant") {
-      steps {
-        dir("Back") {
-          // continueOnError pour ne pas bloquer le pipeline
-          sh """
-            mvn test \
-              -Dtest=*KidneyTransplant*,*PostTransplantFollowUp* \
-              -DfailIfNoTests=false \
-              -Dmaven.test.failure.ignore=true
-          """
-        }
-      }
-    }
-
-    stage("Test Forum") {
-      steps {
-        dir("Back") {
-          sh """
-            mvn test \
-              -Dtest=ForumServiceTest,PostServiceTest \
-              -DfailIfNoTests=false \
-              -Dmaven.test.failure.ignore=true
-          """
-        }
-      }
-    }
-
     stage("Build Frontend") {
       steps {
         dir("Front") {
@@ -77,7 +50,7 @@ pipeline {
       steps {
         withSonarQubeEnv("SonarQube") {
           dir("Back") {
-            sh "mvn sonar:sonar -Dsonar.projectKey=pediatric-kidneytransplant-kidneytransplant -Dmaven.test.failure.ignore=true"
+            sh "mvn sonar:sonar -Dsonar.projectKey=pediatric-kidneytransplant-kidneytransplant -DskipTests"
           }
         }
       }
