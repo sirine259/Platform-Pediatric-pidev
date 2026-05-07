@@ -32,12 +32,15 @@ pipeline {
     }
 
     stage("Build Frontend") {
-      steps {
-        dir("Front") {
-          sh "npx ng build --configuration=production || npx ng build"
-        }
-      }
+  steps {
+    dir("Front") {
+      sh """
+        npm install --legacy-peer-deps
+        ./node_modules/.bin/ng build --configuration=production
+      """
     }
+  }
+}
 
     stage("SonarQube") {
       steps {
