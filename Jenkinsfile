@@ -1,22 +1,17 @@
 pipeline {
   agent any
-
   tools {
     maven "Maven3"
     nodejs "NodeJS20"
   }
-
   triggers {
     githubPush()
   }
-
   environment {
     DOCKER_USER = "sirine215"
     TAG         = "${BUILD_NUMBER}"
   }
-
   stages {
-
     stage("Checkout") {
       steps {
         checkout scm
@@ -32,22 +27,26 @@ pipeline {
     }
 
     stage("Build Frontend") {
-  steps {
-    dir("Front") {
-      sh """
-        npm install --legacy-peer-deps
-        ./node_modules/.bin/ng build --configuration=production
-      """
+      steps {
+        dir("Front") {
+          sh """
+            npm install --legacy-peer-deps
+            ./node_modules/.bin/ng build --configuration=production
+          """
+        }
+      }
     }
-  }
-}
 
     stage("SonarQube") {
       steps {
-        withSonarQubeEnv("SonarQube") {
-          dir("Back") {
-            sh "mvn sonar:sonar -Dsonar.projectKey=pediatric-platform -DskipTests"
-          }
+        dir("Back") {
+          sh """
+            mvn sonar:sonar \
+              -Dsonar.host.url=http://host.docker.internal:9000 \
+              -Dsonar.login=squ_93c7014b0f93b700ea8484df5597cc4ed6ee8ae5 \
+              -Dsonar.projectKey=PlatformePediatricBack \
+              -DskipTests=true
+          """
         }
       }
     }
@@ -78,7 +77,6 @@ pipeline {
         """
       }
     }
-
   }
 
   post {
