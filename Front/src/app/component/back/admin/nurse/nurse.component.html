@@ -1,0 +1,180 @@
+<div class="nurse-container">
+  <div class="nurse-header">
+    <h1 class="nurse-title">Gestion des Infirmiers</h1>
+    <button mat-raised-button class="add-nurse-btn" (click)="addNurse()">
+      <mat-icon>add</mat-icon>
+      Nouvel Infirmier
+    </button>
+  </div>
+
+  <div class="stats-grid">
+    <mat-card class="stat-card">
+      <h3>Total Infirmiers</h3>
+      <div class="stat-value">{{ nurses.length }}</div>
+      <div class="stat-label">Infirmiers enregistrés</div>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <h3>Infirmiers Actifs</h3>
+      <div class="stat-value">{{ getActiveNursesCount() }}</div>
+      <div class="stat-label">En service</div>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <h3>Néphrologie</h3>
+      <div class="stat-value">{{ getNephrologyNursesCount() }}</div>
+      <div class="stat-label">Spécialistes</div>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <h3>Urgences</h3>
+      <div class="stat-value">{{ getEmergencyNursesCount() }}</div>
+      <div class="stat-label">Service d'urgence</div>
+    </mat-card>
+  </div>
+
+  <div class="filter-section">
+    <div class="filter-form">
+      <mat-form-field class="filter-field">
+        <mat-label>Rechercher</mat-label>
+        <input matInput [(ngModel)]="searchTerm" (keyup)="applyFilter()" placeholder="Nom, email, département...">
+      </mat-form-field>
+      
+      <mat-form-field class="filter-field">
+        <mat-label>Département</mat-label>
+        <mat-select>
+          <mat-option value="">Tous</mat-option>
+          <mat-option value="Néphrologie">Néphrologie</mat-option>
+          <mat-option value="Urgences pédiatriques">Urgences</mat-option>
+          <mat-option value="Chirurgie">Chirurgie</mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <mat-form-field class="filter-field">
+        <mat-label>Statut</mat-label>
+        <mat-select>
+          <mat-option value="">Tous</mat-option>
+          <mat-option value="active">Actif</mat-option>
+          <mat-option value="inactive">Inactif</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="nurse-table">
+    <div class="table-header">
+      <h2 class="table-title">Liste des Infirmiers</h2>
+    </div>
+    
+    <div *ngIf="isLoading" class="loading-spinner">
+      <mat-spinner></mat-spinner>
+    </div>
+    
+    <div *ngIf="!isLoading && nurses.length === 0" class="empty-state">
+      <mat-icon>health_and_safety</mat-icon>
+      <p>Aucun infirmier enregistré</p>
+    </div>
+    
+    <table mat-table *ngIf="!isLoading && nurses.length > 0" [dataSource]="nurses">
+      <!-- ID Column -->
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef>ID</th>
+        <td mat-cell *matCellDef="let nurse">{{ nurse.id }}</td>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Nom</th>
+        <td mat-cell *matCellDef="let nurse">
+          <div class="nurse-info">
+            <span class="nurse-name">{{ nurse.name }}</span>
+            <span class="nurse-contact">{{ nurse.email }}</span>
+            <span class="nurse-license">{{ nurse.license }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Email Column -->
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef>Email</th>
+        <td mat-cell *matCellDef="let nurse">{{ nurse.email }}</td>
+      </ng-container>
+
+      <!-- Department Column -->
+      <ng-container matColumnDef="department">
+        <th mat-header-cell *matHeaderCellDef>Département</th>
+        <td mat-cell *matCellDef="let nurse">
+          <span [class]="getDepartmentClass(nurse.department)">
+            {{ nurse.department }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- License Column -->
+      <ng-container matColumnDef="license">
+        <th mat-header-cell *matHeaderCellDef>License</th>
+        <td mat-cell *matCellDef="let nurse">
+          <span class="nurse-license">{{ nurse.license }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Statut</th>
+        <td mat-cell *matCellDef="let nurse">
+          <span [class]="getStatusClass(nurse.status)">
+            {{ nurse.status === 'active' ? 'Actif' : 'Inactif' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let nurse">
+          <div class="action-buttons">
+            <button mat-icon-button class="action-btn view" (click)="viewDetails(nurse.id)" matTooltip="Voir détails">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button mat-icon-button class="action-btn schedule" (click)="viewSchedule(nurse.id)" matTooltip="Planning">
+              <mat-icon>schedule</mat-icon>
+            </button>
+            <button mat-icon-button class="action-btn edit" (click)="editNurse(nurse.id)" matTooltip="Modifier">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button class="action-btn" (click)="toggleStatus(nurse)" matTooltip="Changer statut">
+              <mat-icon>sync</mat-icon>
+            </button>
+            <button mat-icon-button class="action-btn delete" (click)="deleteNurse(nurse.id)" matTooltip="Supprimer">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
+  <!-- Quick Actions Section -->
+  <div class="stats-grid" style="margin-top: 32px;">
+    <mat-card class="stat-card" style="cursor: pointer;" (click)="addNurse()">
+      <h3>Nouvel Infirmier</h3>
+      <div class="stat-value">+</div>
+      <div class="stat-label">Ajouter un infirmier</div>
+    </mat-card>
+    
+    <mat-card class="stat-card" style="cursor: pointer;">
+      <h3>Planning</h3>
+      <div class="stat-value">{{ getMonthlyShiftsCount() }}</div>
+      <div class="stat-label">Gardes mensuelles</div>
+    </mat-card>
+    
+    <mat-card class="stat-card" style="cursor: pointer;">
+      <h3>Formations</h3>
+      <div class="stat-value">{{ getTrainingSessionsCount() }}</div>
+      <div class="stat-label">Sessions prévues</div>
+    </mat-card>
+  </div>
+</div>

@@ -1,0 +1,360 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px;
+}
+
+.forum-card {
+  max-width: 100%;
+  margin: 0 auto;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  position: relative;
+}
+
+.forum-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+}
+
+.card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 35px 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+  animation: float 15s linear infinite;
+}
+
+@keyframes float {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  position: relative;
+  z-index: 1;
+}
+
+.title-icon {
+  margin-right: 15px;
+  font-size: 2.5rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.forum-form {
+  padding: 35px 40px;
+}
+
+.form-section {
+  margin-bottom: 35px;
+  padding: 30px;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: 16px;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.form-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: linear-gradient(180deg, #667eea, #764ba2);
+}
+
+.form-section:hover {
+  border-color: #667eea;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+  transform: translateY(-3px);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+}
+
+.section-title mat-icon {
+  margin-right: 12px;
+  color: #667eea;
+  font-size: 28px;
+}
+
+.checkbox-icon {
+  margin-right: 10px;
+  font-size: 20px;
+  vertical-align: middle;
+  color: #667eea;
+}
+
+.forum-preview {
+  background: white;
+  border: 2px solid #667eea;
+  border-radius: 16px;
+  padding: 25px;
+  margin-top: 25px;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.forum-preview::before {
+  content: 'Aperçu';
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 6px 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 0 14px 0 12px;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f4ff;
+}
+
+.preview-title {
+  margin: 0;
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.preview-category {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 8px 18px;
+  border-radius: 25px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.35);
+}
+
+.preview-description {
+  color: #495057;
+  margin: 0 0 18px 0;
+  line-height: 1.7;
+  font-size: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border-left: 4px solid #667eea;
+}
+
+.preview-meta {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-top: 15px;
+  border-top: 1px solid #f0f4ff;
+}
+
+.preview-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6c757d;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.preview-status mat-icon {
+  font-size: 18px;
+  color: #667eea;
+}
+
+.form-actions {
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 3px solid #f0f4ff;
+}
+
+.left-actions, .right-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.mat-mdc-form-field-flex {
+  background-color: white;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.mat-mdc-form-field-flex:hover {
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+}
+
+.mat-mdc-form-field-appearance-outline .mdc-text-field--outlined {
+  background-color: white;
+  border-radius: 10px;
+}
+
+.mat-mdc-form-field {
+  transition: all 0.3s ease;
+}
+
+.mat-mdc-form-field:hover {
+  transform: translateY(-2px);
+}
+
+.mat-mdc-checkbox {
+  margin-bottom: 15px;
+}
+
+.mat-mdc-checkbox .mdc-checkbox__background {
+  border-radius: 6px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-section {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.form-section:nth-child(1) { animation-delay: 0.1s; }
+.form-section:nth-child(2) { animation-delay: 0.2s; }
+
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+  
+  .forum-card {
+    margin: 10px;
+  }
+  
+  .card-header {
+    padding: 25px;
+  }
+  
+  .card-title {
+    font-size: 1.4rem;
+    flex-direction: column;
+  }
+  
+  .title-icon {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+  
+  .forum-form {
+    padding: 25px;
+  }
+  
+  .form-section {
+    padding: 20px;
+    margin-bottom: 25px;
+  }
+  
+  .section-title {
+    font-size: 1.1rem;
+  }
+  
+  .form-actions .d-flex {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .right-actions {
+    justify-content: center;
+  }
+  
+  .preview-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .preview-meta {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.mat-mdc-raised-button {
+  border-radius: 12px;
+  font-weight: 600;
+  padding: 12px 28px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+}
+
+.mat-mdc-raised-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+.mat-mdc-outlined-button {
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.mat-mdc-outlined-button:hover {
+  transform: translateY(-2px);
+  background: #f8f9fa;
+}

@@ -1,0 +1,204 @@
+<div class="update-post-container">
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="sr-only">Chargement...</span>
+    </div>
+    <p class="mt-2">Chargement du post...</p>
+  </div>
+
+  <div *ngIf="!isLoading && post" class="update-form">
+    <div class="update-header">
+      <h2 class="update-post-title">
+        <i class="fas fa-edit"></i> 
+        Mettre à jour le Post
+      </h2>
+    </div>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-section">
+        <h3 class="form-section-title">
+          <i class="fas fa-info-circle"></i>
+          Informations du Post
+        </h3>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="postType">Type de Post</label>
+              <select 
+                id="postType" 
+                class="form-control" 
+                [(ngModel)]="post.postType"
+                required>
+                <option value="FORUM">Discussion Forum</option>
+                <option value="ANNOUNCEMENT">Annonce Médicale</option>
+                <option value="MEDICAL_UPDATE">Mise à jour Médicale</option>
+                <option value="FOLLOW_UP">Suivi Pédiatrique</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="title">Titre du Post</label>
+          <input
+            type="text"
+            id="title"
+            class="form-control"
+            [(ngModel)]="post.title"
+            placeholder="Ex: Mise à jour sur la transplantation pédiatrique..."
+            required
+            minlength="3"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="content">Contenu</label>
+          <textarea
+            id="content"
+            class="form-control"
+            [(ngModel)]="post.content"
+            rows="8"
+            placeholder="Mettez à jour les informations médicales pédiatriques..."
+            required
+            minlength="10"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="form-section" *ngIf="post.picture">
+        <h3 class="form-section-title">
+          <i class="fas fa-image"></i>
+          Image du Post
+        </h3>
+
+        <div class="form-group">
+          <label>Image Actuelle</label>
+          <div class="current-image">
+            <img [src]="post.picture.startsWith('data:') || post.picture.startsWith('http') ? post.picture : apiUrl + '/api/posts/images/' + post.picture" 
+                 class="preview-image" 
+                 alt="Image actuelle du post"
+                 onerror="this.style.display='none'">
+            <div class="image-info">
+              <h5>Image actuelle</h5>
+              <p>Vous pouvez la supprimer ou en charger une nouvelle</p>
+              <button type="button" 
+                      class="btn btn-danger btn-sm mt-3" 
+                      (click)="removeImage()">
+                <i class="fas fa-trash"></i> Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3 class="form-section-title">
+          <i class="fas fa-cloud-upload-alt"></i>
+          Changer l'image ou vidéo
+        </h3>
+
+        <div class="form-group">
+          <label for="file">Télécharger une nouvelle image ou vidéo (optionnel)</label>
+          <input 
+            type="file" 
+            id="file" 
+            class="form-control"
+            (change)="onFileSelected($event)"
+            accept="image/*,video/*">
+          <small class="form-text">
+            <i class="fas fa-info-circle"></i> Formats acceptés: JPG, PNG, GIF, MP4. Taille max: 10MB
+          </small>
+        </div>
+      </div>
+
+      <div class="form-section" *ngIf="post.videoUrl">
+        <h3 class="form-section-title">
+          <i class="fas fa-video"></i>
+          Vidéo du Post
+        </h3>
+
+        <div class="form-group">
+          <label>Vidéo Actuelle</label>
+          <div class="current-image">
+            <video [src]="post.videoUrl" 
+                   class="preview-video" 
+                   controls
+                   onerror="this.style.display='none'">
+              Votre navigateur ne supporte pas la lecture vidéo.
+            </video>
+            <div class="image-info">
+              <h5>Vidéo actuelle</h5>
+              <button type="button" 
+                      class="btn btn-danger btn-sm mt-3" 
+                      (click)="removeVideo()">
+                <i class="fas fa-trash"></i> Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="isSubmitting">
+          <span *ngIf="!isSubmitting">
+            <i class="fas fa-save"></i> Mettre à jour
+          </span>
+          <span *ngIf="isSubmitting">
+            <i class="fas fa-spinner fa-spin"></i> Mise à jour en cours...
+          </span>
+        </button>
+        <button 
+          type="button" 
+          (click)="cancel()" 
+          class="btn btn-secondary">
+          <i class="fas fa-times"></i> Annuler
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="!isLoading && !post" class="text-center py-5">
+    <i class="fas fa-exclamation-triangle fa-4x text-warning mb-4"></i>
+    <h4>Post non trouvé</h4>
+    <p class="text-muted">Le post que vous essayez de modifier n'existe pas.</p>
+    <button class="btn btn-primary" (click)="cancel()">
+      <i class="fas fa-arrow-left"></i> Retour
+    </button>
+  </div>
+</div>
+
+<style>
+.update-post-container {
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+}
+
+.spinner-border {
+  width: 4rem;
+  height: 4rem;
+  border-width: 5px;
+  border-color: #667eea;
+  border-right-color: transparent;
+}
+
+.text-warning {
+  color: #ffc107;
+}
+
+.mt-3 {
+  margin-top: 15px;
+}
+
+.form-text {
+  display: block;
+  margin-top: 8px;
+  color: #6c757d;
+  font-size: 13px;
+  font-style: italic;
+}
+</style>

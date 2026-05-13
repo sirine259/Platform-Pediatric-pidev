@@ -1,0 +1,174 @@
+<div class="ml-dashboard-container">
+  <h1>Tableau de Bord</h1>
+  <p class="subtitle">Analyses pour les modules Forum et Greffe Rénale</p>
+
+  <div class="dashboard-content">
+    <div class="stats-row">
+      <mat-card class="stat-card">
+        <mat-card-header>
+          <mat-card-title>Clustering Forum</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div *ngIf="loadingForumClusters"><mat-spinner diameter="30"></mat-spinner></div>
+          <div *ngIf="errorForumClusters">
+            <mat-icon color="warn">error</mat-icon>
+            <p class="stat-label">{{ errorForumClusters }}</p>
+            <button mat-button color="primary" (click)="loadForumClusters()">Réessayer</button>
+          </div>
+          <div *ngIf="!loadingForumClusters && !errorForumClusters">
+            <p class="stat-value">{{ getClusterEntries(forumClusters).length }}</p>
+            <p class="stat-label">Clusters détectés</p>
+            <div class="cluster-list">
+              <div *ngFor="let cluster of getClusterEntries(forumClusters)" class="cluster-item">
+                <span class="cluster-name">{{ cluster.topTerms.join(', ') || 'Cluster ' + cluster.clusterId }}</span>
+                <span class="cluster-size">{{ cluster.size }} posts</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-header>
+          <mat-card-title>Clustering Greffe Rénale</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div *ngIf="loadingKidneyClusters"><mat-spinner diameter="30"></mat-spinner></div>
+          <div *ngIf="errorKidneyClusters">
+            <mat-icon color="warn">error</mat-icon>
+            <p class="stat-label">{{ errorKidneyClusters }}</p>
+            <button mat-button color="primary" (click)="loadKidneyClusters()">Réessayer</button>
+          </div>
+          <div *ngIf="!loadingKidneyClusters && !errorKidneyClusters">
+            <p class="stat-value">{{ getClusterEntries(kidneyClusters).length }}</p>
+            <p class="stat-label">Clusters détectés</p>
+            <div class="cluster-list">
+              <div *ngFor="let cluster of getClusterEntries(kidneyClusters)" class="cluster-item">
+                <span class="cluster-name">{{ cluster.topTerms.join(', ') || 'Cluster ' + cluster.clusterId }}</span>
+                <span class="cluster-size">{{ cluster.size }} greffes</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-header>
+          <mat-card-title>Posts Tendance</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div *ngIf="loadingTrending"><mat-spinner diameter="30"></mat-spinner></div>
+          <div *ngIf="errorTrending">
+            <mat-icon color="warn">error</mat-icon>
+            <p class="stat-label">{{ errorTrending }}</p>
+            <button mat-button color="primary" (click)="loadTrendingPosts()">Réessayer</button>
+          </div>
+          <div *ngIf="!loadingTrending && !errorTrending">
+            <div *ngIf="trendingPosts && trendingPosts.length > 0">
+              <div *ngFor="let post of trendingPosts" class="trending-item">
+                <strong>{{ post.name }}</strong>
+                <span class="score">Score: {{ post.score | number:'1.1-1' }}</span>
+              </div>
+            </div>
+            <p *ngIf="!trendingPosts || trendingPosts.length === 0" class="stat-label">Aucune donnée tendance</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="algorithms-section">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Algorithmes Implémentés</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-chip-set>
+            <mat-chip color="primary" selected>K-Means (Clustering)</mat-chip>
+            <mat-chip color="primary" selected>Naive Bayes (Classification)</mat-chip>
+            <mat-chip color="primary" selected>Régression Linéaire (Prédiction)</mat-chip>
+            <mat-chip color="primary" selected>Similarité Cosinus (Recommandation)</mat-chip>
+            <mat-chip color="primary" selected>TF-IDF (Extraction de features)</mat-chip>
+          </mat-chip-set>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="features-section">
+      <h2>Fonctionnalités par Module</h2>
+      <div class="feature-grid">
+        <mat-card class="feature-card">
+          <mat-card-header>
+            <mat-card-title>Forum - Clustering</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>Regroupement des posts par thématiques (K-Means + TF-IDF)</p>
+            <button mat-stroked-button color="primary" routerLink="/ml/clustering">Explorer</button>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="feature-card">
+          <mat-card-header>
+            <mat-card-title>Forum - Classification</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>Classification du contenu des posts (Questions, Témoignages, Support...)</p>
+            <button mat-stroked-button color="primary" routerLink="/ml/classification">Explorer</button>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="feature-card">
+          <mat-card-header>
+            <mat-card-title>Forum - Prédiction</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>Prédiction de popularité, engagement et potentiel viral</p>
+            <button mat-stroked-button color="primary" routerLink="/ml/prediction">Explorer</button>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="feature-card">
+          <mat-card-header>
+            <mat-card-title>Forum - Recommandation</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>Recommandation de posts personnalisée et contenu similaire</p>
+            <button mat-stroked-button color="primary" routerLink="/ml/recommendation">Explorer</button>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="feature-card">
+          <mat-card-header>
+            <mat-card-title>Greffe - Clustering</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>Regroupement des greffes par profil de risque (ischémie, rejet, échec)</p>
+            <button mat-stroked-button color="primary" routerLink="/ml/clustering">Explorer</button>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="feature-card">
+          <mat-card-header>
+            <mat-card-title>Greffe - Classification</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>Classification des résultats (succès, rejet, échec, risque de complication)</p>
+            <button mat-stroked-button color="primary" routerLink="/ml/classification">Explorer</button>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="feature-card">
+          <mat-card-header>
+            <mat-card-title>Greffe - Prédiction</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>Prédiction de survie du greffon, risque de rejet, créatinine, réhospitalisation</p>
+            <button mat-stroked-button color="primary" routerLink="/ml/prediction">Explorer</button>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="feature-card">
+          <mat-card-header>
+            <mat-card-title>Greffe - Recommandation</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>Plan de suivi, traitement immunosuppresseur, ajustements mode de vie</p>
+            <button mat-stroked-button color="primary" routerLink="/ml/recommendation">Explorer</button>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

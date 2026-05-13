@@ -1,0 +1,328 @@
+.container-fluid {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  padding: 30px;
+}
+
+.card {
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.25);
+}
+
+.forum-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border-left: 5px solid transparent;
+  border-image: linear-gradient(180deg, #667eea, #764ba2) 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.forum-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.forum-card:hover::before {
+  opacity: 1;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 25px;
+  padding: 14px 35px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.45);
+}
+
+.btn-outline-primary {
+  border: 2px solid #667eea;
+  color: #667eea;
+  border-radius: 25px;
+  padding: 12px 30px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  background: transparent;
+}
+
+.btn-outline-primary:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.form-control, .form-select {
+  border-radius: 12px;
+  border: 2px solid #e9ecef;
+  padding: 14px 18px;
+  transition: all 0.3s ease;
+  font-size: 15px;
+  background: white;
+}
+
+.form-control:hover, .form-select:hover {
+  border-color: #b8c6db;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+  outline: none;
+  transform: translateY(-2px);
+}
+
+.form-check-input:checked {
+  background-color: #667eea;
+  border-color: #667eea;
+}
+
+.form-check-input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.badge-success { 
+  background: linear-gradient(135deg, #28a745, #20c997);
+  box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+}
+.badge-warning { 
+  background: linear-gradient(135deg, #ffc107, #fd7e14);
+  color: #212529;
+  box-shadow: 0 3px 10px rgba(255, 193, 7, 0.3);
+}
+.badge-info { 
+  background: linear-gradient(135deg, #17a2b8, #6610f2);
+  box-shadow: 0 3px 10px rgba(23, 162, 184, 0.3);
+}
+.badge-secondary { 
+  background: linear-gradient(135deg, #6c757d, #495057);
+  box-shadow: 0 3px 10px rgba(108, 117, 125, 0.3);
+}
+
+h2, h3 {
+  color: #2c3e50;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+h3 {
+  font-size: 1.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.card-title {
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+
+.card-text {
+  color: #6c757d;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+.forum-icon-container {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.forum-icon-container i {
+  font-size: 28px;
+  color: white;
+}
+
+.activity-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background: #28a745;
+  border-radius: 50%;
+  margin-right: 8px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.2);
+  }
+}
+
+.category-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #667eea;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.stat-box {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  transform: translateY(-2px);
+}
+
+.stat-number {
+  font-size: 20px;
+  font-weight: 700;
+  color: #667eea;
+  display: block;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+.card:nth-child(5) { animation-delay: 0.5s; }
+.card:nth-child(6) { animation-delay: 0.6s; }
+
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 15px;
+  }
+  
+  h2 {
+    font-size: 1.6rem;
+  }
+  
+  .btn-primary {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  .forum-card {
+    margin-bottom: 15px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .forum-icon-container {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .forum-icon-container i {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 576px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

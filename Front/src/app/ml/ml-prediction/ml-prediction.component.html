@@ -1,0 +1,130 @@
+<div class="container">
+  <h1>Prédiction</h1>
+  <p>Analyses prédictives pour le Forum et la Greffe Rénale</p>
+
+  <div class="sections">
+    <!-- Forum Predictions -->
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>Popularit Forum</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline">
+          <mat-label>ID du Post</mat-label>
+          <input matInput type="number" [(ngModel)]="postId">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="loadPopularity()" [disabled]="!postId">Prdire</button>
+        <div *ngIf="popularityResult" class="result">
+          <p><strong>Score popularit:</strong> {{ popularityResult.predictedValue | number:'1.2-2' }}</p>
+          <p><strong>Confiance:</strong> {{ popularityResult.confidence * 100 | number:'1.0-0' }}%</p>
+          <p *ngIf="popularityResult.details"><strong>Vues prvues:</strong> {{ getDetailValue(popularityResult.details, 'predictedViews') | number:'1.0-0' }}</p>
+          <p *ngIf="popularityResult.details"><strong>Likes prvus:</strong> {{ getDetailValue(popularityResult.details, 'predictedLikes') | number:'1.0-0' }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>Engagement Forum</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline">
+          <mat-label>ID du Post</mat-label>
+          <input matInput type="number" [(ngModel)]="postId">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="loadEngagement()" [disabled]="!postId">Prdire</button>
+        <div *ngIf="engagementResult" class="result">
+          <p><strong>Score engagement:</strong> {{ engagementResult.predictedValue | number:'1.2-2' }}</p>
+          <p><strong>Confiance:</strong> {{ engagementResult.confidence * 100 | number:'1.0-0' }}%</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>Tendance Forum</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline">
+          <mat-label>ID du Post</mat-label>
+          <input matInput type="number" [(ngModel)]="postId">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="loadTrend()" [disabled]="!postId">Analyser</button>
+        <div *ngIf="trendResult" class="result">
+          <p><strong>Potentiel tendance:</strong> {{ trendResult.predictedValue | number:'1.2-2' }}</p>
+          <p><strong>Confiance:</strong> {{ trendResult.confidence * 100 | number:'1.0-0' }}%</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>Posts Tendance</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <button mat-raised-button color="primary" (click)="loadTrendingPosts()">Charger</button>
+        <div *ngIf="trendingPosts && trendingPosts.length > 0" class="result">
+          <div *ngFor="let p of trendingPosts" class="trend-item">
+            <strong>{{ p.name }}</strong>
+            <span class="score">Score: {{ p.score | number:'1.1-1' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Transplant Predictions -->
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>Survie du Greffon</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline">
+          <mat-label>ID de la Greffe</mat-label>
+          <input matInput type="number" [(ngModel)]="survivalTransplantId">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="loadSurvival()" [disabled]="!survivalTransplantId">Prdire</button>
+        <div *ngIf="survivalResult" class="result">
+          <p><strong>Survie estime:</strong> {{ survivalResult.predictedValue | number:'1.0-0' }} mois</p>
+          <p><strong>Confiance:</strong> {{ survivalResult.confidence * 100 | number:'1.0-0' }}%</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>Risque de Rejet</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline">
+          <mat-label>ID de la Greffe</mat-label>
+          <input matInput type="number" [(ngModel)]="transplantId">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="loadRejectionRisk()" [disabled]="!transplantId">Prdire</button>
+        <div *ngIf="rejectionResult" class="result">
+          <p><strong>Risque:</strong> {{ rejectionResult.predictedValue * 100 | number:'1.0-0' }}%</p>
+          <p><strong>Niveau:</strong> <span [class]="getRiskLevel(rejectionResult.predictedValue)">{{ rejectionResult.predictedValue > 0.5 ? 'LEVE' : rejectionResult.predictedValue > 0.2 ? 'MODR' : 'FAIBLE' }}</span></p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>Tendance Cratinine</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline">
+          <mat-label>ID de la Greffe</mat-label>
+          <input matInput type="number" [(ngModel)]="creatinineTransplantId">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="loadCreatinineTrend()" [disabled]="!creatinineTransplantId">Prdire</button>
+        <div *ngIf="creatinineResult" class="result">
+          <p><strong>Cratinine prvue:</strong> {{ creatinineResult.predictedValue | number:'1.2-2' }} mg/dL</p>
+          <p *ngIf="creatinineResult.details"><strong>Tendance:</strong> {{ getDetailValue(creatinineResult.details, 'trend') }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>Risque Rhospitalisation</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline">
+          <mat-label>ID de la Greffe</mat-label>
+          <input matInput type="number" [(ngModel)]="transplantId">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="loadReadmissionRisk()" [disabled]="!transplantId">Prdire</button>
+        <div *ngIf="readmissionResult" class="result">
+          <p><strong>Risque:</strong> {{ readmissionResult.predictedValue * 100 | number:'1.0-0' }}%</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div *ngIf="loading"><mat-spinner diameter="30"></mat-spinner></div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+</div>

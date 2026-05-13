@@ -1,0 +1,126 @@
+.ml-dashboard-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 500;
+}
+
+.subtitle {
+  color: #666;
+  margin-top: 4px;
+  margin-bottom: 24px;
+}
+
+.loading-container, .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 16px;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card mat-card-header {
+  border-bottom: 1px solid #eee;
+  margin-bottom: 12px;
+}
+
+.stat-value {
+  font-size: 36px;
+  font-weight: 700;
+  margin: 8px 0;
+  color: #1976d2;
+}
+
+.stat-label {
+  color: #666;
+  font-size: 14px;
+}
+
+.stat-confidence {
+  font-size: 12px;
+  color: #999;
+}
+
+.positive { color: #4caf50; }
+.moderate { color: #ff9800; }
+.negative { color: #f44336; }
+
+.cluster-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cluster-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.cluster-0 { background: #e3f2fd; }
+.cluster-1 { background: #fce4ec; }
+.cluster-2 { background: #e8f5e9; }
+
+.cluster-name { font-weight: 500; }
+.cluster-size { color: #666; }
+
+.algorithms-section {
+  margin-bottom: 24px;
+}
+
+.nav-section h2 {
+  margin-bottom: 16px;
+}
+
+.nav-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.nav-card {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-align: center;
+  padding: 24px;
+}
+
+.nav-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.nav-card mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #1976d2;
+  margin-bottom: 12px;
+}
+
+.nav-card h3 {
+  margin: 8px 0;
+}
+
+.nav-card p {
+  color: #666;
+  font-size: 13px;
+  margin: 0;
+}

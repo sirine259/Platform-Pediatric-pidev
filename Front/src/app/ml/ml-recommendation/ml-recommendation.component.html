@@ -1,0 +1,128 @@
+<div class="container">
+  <h1>Recommandation</h1>
+  <p>Recommandations intelligentes pour Forum et Greffe Rénale</p>
+
+  <div class="sections">
+    <!-- Forum Recommendations -->
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>Posts Recommands</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline">
+          <mat-label>ID Utilisateur</mat-label>
+          <input matInput type="number" [(ngModel)]="userId">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="recommendPosts()" [disabled]="!userId">Recommander</button>
+        <div *ngIf="postsResult && postsResult.length > 0" class="result">
+          <h3>Posts recommands ({{ postsResult.length }})</h3>
+          <div *ngFor="let item of postsResult" class="recommendation-item">
+            <div class="rec-header">
+              <strong>{{ item.name }}</strong>
+              <span class="score" [class]="getScoreClass(item.score)">{{ item.score | number:'1.2-2' }}</span>
+            </div>
+            <p class="reason" *ngIf="item.reason">{{ item.reason }}</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>Posts Similaires</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline">
+          <mat-label>ID du Post</mat-label>
+          <input matInput type="number" [(ngModel)]="postId">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="recommendSimilar()" [disabled]="!postId">Rechercher</button>
+        <div *ngIf="similarResult && similarResult.length > 0" class="result">
+          <h3>Posts similaires ({{ similarResult.length }})</h3>
+          <div *ngFor="let item of similarResult" class="recommendation-item">
+            <div class="rec-header">
+              <strong>{{ item.name }}</strong>
+              <span class="score" [class]="getScoreClass(item.score)">{{ item.score | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Transplant Recommendations -->
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>Plan de Suivi</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline">
+          <mat-label>ID Greffe</mat-label>
+          <input matInput type="number" [(ngModel)]="transplantId">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="recommendFollowUp()" [disabled]="!transplantId">Recommander</button>
+        <div *ngIf="followUpResult && followUpResult.length > 0" class="result">
+          <div *ngFor="let item of followUpResult" class="recommendation-item">
+            <div class="rec-header">
+              <strong>{{ item.name }}</strong>
+              <span class="score" [class]="getScoreClass(item.score)">{{ item.score | number:'1.1-1' }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>Traitement Immunosuppresseur</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline">
+          <mat-label>ID Greffe</mat-label>
+          <input matInput type="number" [(ngModel)]="transplantId">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="recommendImmunosuppression()" [disabled]="!transplantId">Recommander</button>
+        <div *ngIf="immunosuppressionResult && immunosuppressionResult.length > 0" class="result">
+          <div *ngFor="let item of immunosuppressionResult" class="recommendation-item">
+            <div class="rec-header">
+              <strong>{{ item.name }}</strong>
+              <span class="score" [class]="getScoreClass(item.score)">{{ item.score | number:'1.1-1' }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>Mode de Vie</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline">
+          <mat-label>ID Greffe</mat-label>
+          <input matInput type="number" [(ngModel)]="transplantId">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="recommendLifestyle()" [disabled]="!transplantId">Recommander</button>
+        <div *ngIf="lifestyleResult && lifestyleResult.length > 0" class="result">
+          <div *ngFor="let item of lifestyleResult" class="recommendation-item">
+            <div class="rec-header">
+              <strong>{{ item.name }}</strong>
+              <span class="score" [class]="getScoreClass(item.score)">{{ item.score | number:'1.1-1' }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>Greffes Similaires</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline">
+          <mat-label>ID Greffe</mat-label>
+          <input matInput type="number" [(ngModel)]="transplantId">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="findSimilarTransplants()" [disabled]="!transplantId">Rechercher</button>
+        <div *ngIf="similarTransplantResult && similarTransplantResult.length > 0" class="result">
+          <div *ngFor="let item of similarTransplantResult" class="recommendation-item">
+            <div class="rec-header">
+              <strong>{{ item.name }}</strong>
+              <span class="score" [class]="getScoreClass(item.score)">{{ item.score | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div *ngIf="loading"><mat-spinner diameter="30"></mat-spinner></div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+</div>

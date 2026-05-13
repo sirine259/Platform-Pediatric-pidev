@@ -1,0 +1,27 @@
+<div class="portal-container">
+  <h1 class="portal-title">Accès à la plateforme</h1>
+  <p class="portal-subtitle">
+    Vous êtes connecté. Choisissez l'espace que vous souhaitez ouvrir.
+  </p>
+
+  <div class="portal-grid">
+    <div class="portal-card" (click)="openForum()">
+      <mat-icon class="portal-icon">forum</mat-icon>
+      <h2>Forum pédiatrique</h2>
+      <p>Espace de discussion et d'échange autour des cas et questions pédiatriques.</p>
+      <button mat-raised-button color="primary" (click)="$event.stopPropagation(); openForum()">
+        Ouvrir le Forum
+      </button>
+    </div>
+
+    <div class="portal-card" (click)="openKidneyTransplant()">
+      <mat-icon class="portal-icon">medical_services</mat-icon>
+      <h2>Gestion Kidney Transplant</h2>
+      <p>Suivi complet des transplantations rénales pédiatriques et des dossiers.</p>
+      <button mat-raised-button color="accent" (click)="$event.stopPropagation(); openKidneyTransplant()">
+        Ouvrir Kidney Transplant
+      </button>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,83 @@
+<div class="nurse-container">
+  <!-- Header Section -->
+  <div class="nurse-header">
+    <div class="welcome-section">
+      <h1 class="welcome-title">
+        <mat-icon>healing</mat-icon>
+        Espace Infirmier
+      </h1>
+      <p class="welcome-subtitle">Bienvenue, {{ currentUser.name }}</p>
+      <div class="nurse-info">
+        <span class="info-badge">Département: {{ currentUser.department }}</span>
+      </div>
+    </div>
+    
+    <div class="quick-actions">
+      <button mat-raised-button color="primary" (click)="viewSchedule()">
+        <mat-icon>schedule</mat-icon>
+        Mon Planning
+      </button>
+      <button mat-raised-button color="accent" (click)="viewMedications()">
+        <mat-icon>medication</mat-icon>
+        Médicaments
+      </button>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  <div class="content-section">
+    <div class="section-grid">
+      <!-- Patients -->
+      <div class="section-card">
+        <h2 class="section-title">
+          <mat-icon>people</mat-icon>
+          Patients Assignés
+        </h2>
+
+        <div *ngIf="isLoading" class="loading-spinner">
+          <mat-icon class="spin">refresh</mat-icon>
+          <p>Chargement des patients...</p>
+        </div>
+
+        <div *ngIf="!isLoading" class="patients-list">
+          <div *ngFor="let patient of patients" class="patient-item">
+            <div class="patient-info">
+              <h4>{{ patient.name }}</h4>
+              <p>Âge: {{ patient.age }} ans | Chambre: {{ patient.room }}</p>
+              <span class="status-badge" [class.stable]="patient.condition === 'Stable'">
+                {{ patient.condition === 'Stable' ? 'Stable' : 'Critique' }}
+              </span>
+            </div>
+            <div class="patient-actions">
+              <button mat-button color="primary" (click)="viewPatient(patient)">
+                <mat-icon>visibility</mat-icon>
+                Voir
+              </button>
+              <button mat-button color="accent" (click)="updateVitals(patient)">
+                <mat-icon>favorite</mat-icon>
+                Signes Vitaux
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schedule -->
+      <div class="section-card">
+        <h2 class="section-title">
+          <mat-icon>calendar_today</mat-icon>
+          Planning du Jour
+        </h2>
+
+        <div class="schedule-list">
+          <div *ngFor="let schedule of schedules" class="schedule-item">
+            <div class="schedule-info">
+              <h4>{{ schedule.date }}</h4>
+              <p>Shift: {{ schedule.shift }} | Patients: {{ schedule.patients }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

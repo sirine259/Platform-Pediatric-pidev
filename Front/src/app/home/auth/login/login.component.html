@@ -1,0 +1,102 @@
+<div class="login-container">
+  <div class="login-card">
+    <!-- Header Section -->
+    <div class="auth-header">
+      <div class="header-content">
+        <div class="logo-section">
+          <mat-icon class="main-logo">medical_services</mat-icon>
+          <h1 class="app-title">Plateforme Pédiatrique</h1>
+        </div>
+        <div class="header-text">
+          <h2 class="auth-title">Connexion</h2>
+          <p class="auth-subtitle">Accédez à votre espace personnel</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <form class="auth-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-section">
+        <h3 class="section-title">
+          <mat-icon>login</mat-icon>
+          Informations de Connexion
+        </h3>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nom d'utilisateur</mat-label>
+            <input matInput 
+                   type="text" 
+                   formControlName="username" 
+                   placeholder="Entrez votre nom d'utilisateur"
+                   required>
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-error *ngIf="username?.invalid && (username?.dirty || username?.touched)">
+              <span *ngIf="username?.errors?.['required']">Le nom d'utilisateur est requis</span>
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Mot de passe</mat-label>
+            <input matInput 
+                   type="password" 
+                   formControlName="password" 
+                   placeholder="Entrez votre mot de passe"
+                   required>
+            <mat-icon matSuffix>lock</mat-icon>
+            <mat-error *ngIf="password?.invalid && (password?.dirty || password?.touched)">
+              <span *ngIf="password?.errors?.['required']">Le mot de passe est requis</span>
+              <span *ngIf="password?.errors?.['minlength']">Le mot de passe doit contenir au moins 6 caractères</span>
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div *ngIf="successMessage" class="success-message">
+        <mat-icon>check_circle</mat-icon>
+        {{ successMessage }}
+      </div>
+
+      <div *ngIf="errorMessage" class="error-message">
+        <mat-icon>error</mat-icon>
+        {{ errorMessage }}
+      </div>
+
+      <!-- Submit Button -->
+      <div class="form-actions">
+        <button mat-raised-button 
+                color="primary" 
+                type="submit"
+                [disabled]="loginForm.invalid || isLoading"
+                class="submit-button">
+          <span *ngIf="!isLoading" class="button-content">
+            <mat-icon>login</mat-icon>
+            Se connecter
+          </span>
+          <span *ngIf="isLoading" class="button-content">
+            <mat-icon class="spinner">refresh</mat-icon>
+            Connexion en cours...
+          </span>
+        </button>
+      </div>
+    </form>
+
+    <!-- Footer Section -->
+    <div class="auth-footer">
+      <div class="auth-links">
+        <button mat-button (click)="goToSignup()" class="link-button">
+          <mat-icon>person_add</mat-icon>
+          Créer un compte
+        </button>
+        
+        <button mat-button (click)="goToForgotPassword()" class="link-button">
+          <mat-icon>help</mat-icon>
+          Mot de passe oublié?
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,102 @@
+<div class="container">
+  <h1>Classification</h1>
+  <p>Classification intelligente pour Forum et Greffe Rénale</p>
+
+  <mat-tab-group>
+    <mat-tab label="Forum">
+      <div class="tab-content">
+        <mat-card class="section-card">
+          <mat-card-header><mat-card-title>Classifer un post existant</mat-card-title></mat-card-header>
+          <mat-card-content>
+            <mat-form-field appearance="outline">
+              <mat-label>ID du Post</mat-label>
+              <input matInput type="number" [(ngModel)]="postId">
+            </mat-form-field>
+            <button mat-raised-button color="primary" (click)="classifyPost()" [disabled]="!postId">Classifer</button>
+            <div *ngIf="postResult" class="result">
+              <p><strong>Catgorie:</strong> <span class="category-badge">{{ postResult.predictedClass }}</span></p>
+              <p><strong>Confiance:</strong>
+                <span [class]="'confidence ' + getConfidenceClass(postResult.confidence)">
+                  {{ postResult.confidence * 100 | number:'1.0-0' }}%
+                </span>
+              </p>
+              <div *ngIf="postResult.classProbabilities">
+                <h4>Probabilits dtailles:</h4>
+                <div *ngFor="let p of getProbabilitiesEntries(postResult.classProbabilities)" class="prob-bar">
+                  <span class="prob-label">{{ p.key }}</span>
+                  <div class="prob-track">
+                    <div class="prob-fill" [style.width.%]="p.value * 100" [class]="getConfidenceClass(p.value)"></div>
+                  </div>
+                  <span class="prob-value">{{ (p.value * 100) | number:'1.0-0' }}%</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="section-card">
+          <mat-card-header><mat-card-title>Classifer un texte libre</mat-card-title></mat-card-header>
+          <mat-card-content>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Titre</mat-label>
+              <input matInput [(ngModel)]="contentTitle" placeholder="Titre du post">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Contenu</mat-label>
+              <textarea matInput [(ngModel)]="contentText" rows="3" placeholder="Contenu du post"></textarea>
+            </mat-form-field>
+            <button mat-raised-button color="primary" (click)="classifyText()">Classifer</button>
+            <div *ngIf="textResult" class="result">
+              <p><strong>Catgorie:</strong> <span class="category-badge">{{ textResult.predictedClass }}</span></p>
+              <p><strong>Confiance:</strong> {{ textResult.confidence * 100 | number:'1.0-0' }}%</p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Greffe Rnale">
+      <div class="tab-content">
+        <mat-card class="section-card">
+          <mat-card-header><mat-card-title>Classification complte de la greffe</mat-card-title></mat-card-header>
+          <mat-card-content>
+            <mat-form-field appearance="outline">
+              <mat-label>ID de la Greffe</mat-label>
+              <input matInput type="number" [(ngModel)]="transplantId">
+            </mat-form-field>
+            <button mat-raised-button color="primary" (click)="classifyTransplant()" [disabled]="!transplantId">Classifer</button>
+          </mat-card-content>
+        </mat-card>
+
+        <div *ngIf="transplantResult" class="results-grid">
+          <mat-card class="result-card">
+            <mat-card-header><mat-card-title>Rsultat</mat-card-title></mat-card-header>
+            <mat-card-content>
+              <p><strong>Classe:</strong> {{ transplantResult.predictedClass }}</p>
+              <p><strong>Confiance:</strong> {{ transplantResult.confidence * 100 | number:'1.0-0' }}%</p>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="result-card" *ngIf="riskResult">
+            <mat-card-header><mat-card-title>Niveau de Risque</mat-card-title></mat-card-header>
+            <mat-card-content>
+              <p><strong>Risque:</strong> {{ riskResult.predictedClass }}</p>
+              <p><strong>Confiance:</strong> {{ riskResult.confidence * 100 | number:'1.0-0' }}%</p>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="result-card" *ngIf="complicationResult">
+            <mat-card-header><mat-card-title>Risque Complication</mat-card-title></mat-card-header>
+            <mat-card-content>
+              <p><strong>Risque:</strong> {{ complicationResult.predictedClass }}</p>
+              <p><strong>Dtails:</strong> {{ complicationResult.details }}</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+  <div *ngIf="loading"><mat-spinner diameter="30"></mat-spinner></div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+</div>

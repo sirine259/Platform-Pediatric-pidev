@@ -1,0 +1,53 @@
+<div class="container">
+  <h1>Clustering</h1>
+  <p>Regroupement automatique par similarité (K-Means)</p>
+
+  <div class="tabs">
+    <button mat-raised-button [class.active]="activeTab === 'forum'" (click)="activeTab='forum'">Forum</button>
+    <button mat-raised-button [class.active]="activeTab === 'kidney'" (click)="activeTab='kidney'">Greffe Rénale</button>
+  </div>
+
+  <div *ngIf="loading"><mat-spinner diameter="30"></mat-spinner></div>
+
+  <div *ngIf="activeTab === 'forum' && forumClusters">
+    <h2>Clusters Forum ({{ getClusterEntries(forumClusters).length }})</h2>
+    <div class="clusters-grid">
+      <mat-card *ngFor="let cluster of getClusterEntries(forumClusters)" class="cluster-card">
+        <mat-card-header>
+          <mat-card-title>{{ cluster.topTerms.join(', ') || 'Cluster ' + cluster.clusterId }}</mat-card-title>
+          <mat-card-subtitle>{{ cluster.size }} forums</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="centroid-section" *ngIf="cluster.centroid">
+            <h4>Centroïde</h4>
+            <div *ngFor="let item of cluster.centroid | keyvalue" class="centroid-item">
+              <span>{{ item.key }}:</span>
+              <span>{{ item.value }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'kidney' && kidneyClusters">
+    <h2>Clusters Greffe Rénale ({{ getClusterEntries(kidneyClusters).length }})</h2>
+    <div class="clusters-grid">
+      <mat-card *ngFor="let cluster of getClusterEntries(kidneyClusters)" class="cluster-card">
+        <mat-card-header>
+          <mat-card-title>{{ cluster.topTerms.join(', ') || 'Cluster ' + cluster.clusterId }}</mat-card-title>
+          <mat-card-subtitle>{{ cluster.size }} greffes</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="centroid-section" *ngIf="cluster.centroid">
+            <h4>Centroïde</h4>
+            <div *ngFor="let item of cluster.centroid | keyvalue" class="centroid-item">
+              <span>{{ item.key }}:</span>
+              <span>{{ item.value }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

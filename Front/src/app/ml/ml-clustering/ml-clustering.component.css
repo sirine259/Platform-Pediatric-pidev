@@ -1,0 +1,8 @@
+.container { padding: 24px; max-width: 1200px; margin: 0 auto; }
+h1 { margin: 0; font-size: 24px; }
+.tabs { display: flex; gap: 8px; margin: 16px 0; }
+.tabs button.active { background: #1976d2; color: white; }
+.clusters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 16px; }
+.cluster-card { background: #fafafa; }
+.centroid-section h4 { margin: 8px 0; font-size: 13px; color: #666; }
+.centroid-item { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; border-bottom: 1px solid #f0f0f0; }

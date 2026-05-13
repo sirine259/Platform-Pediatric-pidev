@@ -1,0 +1,265 @@
+.parent-container {
+  padding: 20px;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.parent-header {
+  background: linear-gradient(135deg, #6f42c1 0%, #0d6efd 100%);
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 30px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(111, 66, 193, 0.3);
+}
+
+.welcome-section {
+  margin-bottom: 25px;
+}
+
+.welcome-title {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+}
+
+.welcome-title mat-icon {
+  font-size: 2.5rem;
+}
+
+.welcome-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.parent-info {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.info-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.quick-actions {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.quick-actions button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  font-weight: 500;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.quick-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.content-section {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.section-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 30px;
+}
+
+.section-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 25px;
+  border: 1px solid #e9ecef;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+}
+
+.section-title mat-icon {
+  color: #6f42c1;
+  font-size: 1.5rem;
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.loading-spinner mat-icon {
+  font-size: 2.5rem;
+  color: #6f42c1;
+  animation: spin 1s linear infinite;
+}
+
+.loading-spinner p {
+  margin-top: 15px;
+  color: #6c757d;
+  font-size: 1rem;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.children-list,
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.child-item,
+.notification-item {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.child-item:hover,
+.notification-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.child-info h4,
+.notification-info h4 {
+  margin: 0 0 5px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.child-info p,
+.notification-info p {
+  margin: 0 0 8px 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.school-info {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #17a2b8;
+  color: white;
+}
+
+.notification-date {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: #adb5bd;
+  font-style: italic;
+}
+
+.child-actions,
+.notification-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.child-actions button,
+.notification-actions button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.child-actions button:hover,
+.notification-actions button:hover {
+  transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .parent-container {
+    padding: 15px;
+  }
+  
+  .parent-header {
+    padding: 20px;
+  }
+  
+  .welcome-title {
+    font-size: 1.5rem;
+  }
+  
+  .quick-actions {
+    flex-direction: column;
+  }
+  
+  .content-section {
+    padding: 20px;
+  }
+  
+  .section-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .child-item,
+  .notification-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .child-actions,
+  .notification-actions {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-card {
+    padding: 20px;
+  }
+  
+  .welcome-title {
+    font-size: 1.3rem;
+  }
+  
+  .child-info {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

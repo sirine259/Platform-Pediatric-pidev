@@ -1,0 +1,7 @@
+package com.esprit.platformepediatricback.entity;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class PostTest {
+
+}

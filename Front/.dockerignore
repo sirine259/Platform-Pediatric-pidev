@@ -1,0 +1,13 @@
+# Exclude old/embedded backend project copied inside Front/
+backend/
+
+# Exclude build/runtime artifacts
+dist/
+node_modules/
+.angular/
+
+# Exclude editor/OS junk
+.vscode/
+.idea/
+*.log
+

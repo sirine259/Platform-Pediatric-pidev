@@ -1,0 +1,91 @@
+<div class="follow-up-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="sr-only">Chargement...</span>
+    </div>
+    <p class="mt-2">Chargement des détails du suivi...</p>
+  </div>
+
+  <!-- Follow-up Details -->
+  <div *ngIf="!isLoading && followUp" class="follow-up-details">
+    <!-- Header -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="detail-header">
+          <h2 class="detail-title">
+            <i class="fas fa-stethoscope"></i> 
+            Détails du Suivi
+          </h2>
+          <div class="detail-actions">
+            <button class="btn btn-primary" (click)="updateFollowUp()">
+              <i class="fas fa-edit"></i> Modifier
+            </button>
+            <button class="btn btn-danger" (click)="deleteFollowUp()">
+              <i class="fas fa-trash"></i> Supprimer
+            </button>
+            <button class="btn btn-outline-secondary" (click)="goBack()">
+              <i class="fas fa-arrow-left"></i> Retour
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Follow-up Info -->
+    <div class="row">
+      <div class="col-md-8">
+        <div class="follow-up-info">
+          <div class="info-section">
+            <h4>Informations du Suivi</h4>
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Date:</label>
+                <span>{{ formatDate(followUp.date) }}</span>
+              </div>
+              <div class="info-item">
+                <label>Type:</label>
+                <span class="badge" [ngClass]="'bg-' + getFollowUpTypeColor(followUp.type)">
+                  {{ getFollowUpTypeLabel(followUp.type) }}
+                </span>
+              </div>
+              <div class="info-item">
+                <label>Médecin:</label>
+                <span>{{ followUp.doctor }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h4>Notes Médicales</h4>
+            <div class="notes-content">
+              {{ followUp.notes }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="transplant-info">
+          <h4>Kidney Transplantation Associée</h4>
+          <div *ngIf="transplant" class="transplant-card">
+            <div class="transplant-header">
+              <i class="fas fa-kidney"></i>
+              <span>Kidney Transplantation Rénale</span>
+            </div>
+            <div class="transplant-details">
+              <p><strong>Patient:</strong> {{ transplant.patientName }}</p>
+              <p><strong>Donneur:</strong> {{ transplant.donorName }}</p>
+              <p><strong>Date:</strong> {{ formatDate(transplant.transplantDate) }}</p>
+              <p><strong>Statut:</strong> 
+                <span class="badge" [ngClass]="'bg-' + getStatusColor(transplant.status)">
+                  {{ getStatusLabel(transplant.status) }}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

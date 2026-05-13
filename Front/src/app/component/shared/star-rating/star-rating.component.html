@@ -1,0 +1,41 @@
+<div class="star-rating-container" [class.readonly]="readonly" (mouseleave)="onMouseLeave()">
+
+  <div class="rating-display">
+    <div class="stars-wrapper">
+      <span *ngFor="let star of getStarsArray()"
+            class="star"
+            [class.filled]="isStarFilled(star)"
+            [class.hovered]="hoverRating >= star"
+            [class.clickable]="!readonly"
+            (click)="onStarClick(star)"
+            (mouseenter)="onStarHover(star)">
+        <i class="fas fa-star"></i>
+      </span>
+    </div>
+    <div class="rating-info" *ngIf="showStats && totalRatings > 0">
+      <span class="average-rating">{{ averageRating | number:'1.1-1' }}</span>
+      <span class="total-ratings">({{ totalRatings }} avis)</span>
+    </div>
+  </div>
+
+  <div class="rating-actions" *ngIf="!readonly">
+    <button *ngIf="currentRating > 0" class="reset-btn" (click)="resetRating()">
+      <i class="fas fa-times"></i>
+    </button>
+    <span class="rating-hint" *ngIf="currentRating === 0">Cliquez pour noter</span>
+  </div>
+
+  <div class="rating-distribution" *ngIf="showStats && ratingSummary && totalRatings > 0">
+    <div class="distribution-row" *ngFor="let star of [5,4,3,2,1]">
+      <span class="star-label">{{ star }} <i class="fas fa-star"></i></span>
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="getRatingPercentage(star)"></div>
+      </div>
+      <span class="percentage">{{ getRatingPercentage(star) | number:'1.0-0' }}%</span>
+    </div>
+  </div>
+
+  <div class="loading-overlay" *ngIf="isSubmitting">
+    <i class="fas fa-spinner fa-spin"></i>
+  </div>
+</div>
